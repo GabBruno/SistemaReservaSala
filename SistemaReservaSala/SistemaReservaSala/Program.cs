@@ -23,13 +23,14 @@ while (true)
     tela.LimparJanelaMenu();
 
     // limpa o menu lateral anterior
-    tela.LimparJanelaAcao(); 
-    
+    tela.LimparJanelaAcao();
+
     opcao = tela.DesenharMenu("MENU PRINCIPAL", opcoes); 
+    
+    if (opcao == "0") break;
     
     switch(opcao)
     {
-        case "0": break;
         case "1": reservaCRUD.ExecutarCRUD(); break;
         case "2": clienteCRUD.ExecutarCRUD(); break;
         case "3": salaCRUD.ExecutarCRUD(); break;
