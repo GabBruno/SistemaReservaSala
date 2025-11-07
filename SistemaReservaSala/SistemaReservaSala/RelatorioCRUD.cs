@@ -11,38 +11,33 @@ public class RelatorioCRUD
         this.salaCRUD = sCRUD;
     }
     
-    private List<string> opcoes()
-    {
-        return new List<string>
-        {
-            "[1] Taxa de Ocupação",
-            "[2] Faturamento por Serviço",
-            "[0] Voltar"
-        };
-    }
-    
     public void ExecutarCRUD()
     {
         string opcao;
+        
         List<string> opcoes = new List<string>(); 
         opcoes.Add("[1] Taxa de Ocupação       ");
         opcoes.Add("[2] Faturamento por Serviço");
+        opcoes.Add("[3] Histórico de Reservas  ");
         opcoes.Add("[0] Voltar                 ");
         
         while (true)
         {
+            tela.PrepararTelaPrincipal("Gestão de Aluguéis de Salas de Reunião - Relatórios");
+
             tela.LimparJanelaAcao();
             
+            tela.LimparJanelaMenu();
             opcao = tela.DesenharMenu("RELATÓRIOS", opcoes);
 
             switch (opcao)
             {
                 case "1": GerarRelatorioTaxaOcupacao(); break;
                 case "2": GerarRelatorioFaturamentoServicos(); break;
-                case "0": tela.LimparJanelaMenu(); return; 
+                case "3": GerarRelatorioHistorico(); break; 
+                case "0": return;
                 default:
-                    tela.MostrarMensagemRodape("Opção inválida. Pressione Enter.");
-                    Console.ReadKey();
+                    tela.Pausa("Opção inválida. Pressione Enter.");
                     break;
             }
         }
@@ -50,14 +45,13 @@ public class RelatorioCRUD
 
     private void GerarRelatorioTaxaOcupacao()
     {
-        tela.DesenharJanelaAcao("TAXA DE OCUPAÇÃO");
+        tela.PrepararTelaPrincipal("RELATÓRIO: TAXA DE OCUPAÇÃO");
         
-        var reservas = reservaCRUD.GetReservas().Where(r => r.StatusReserva == "Confirmada").ToList();
+        var reservas = reservaCRUD.Reservas().Where(r => r.StatusReserva == "Confirmada").ToList();
         
         if (reservas.Count == 0)
         {
-            tela.MostrarMensagemRodape("Nenhuma reserva confirmada para exibir. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Nenhuma reserva confirmada para exibir. Pressione Enter.");
             return;
         }
 
@@ -71,49 +65,44 @@ public class RelatorioCRUD
             })
             .OrderByDescending(x => x.TotalHoras);
 
-        int linhaAtual = 3;
-        
+        int linhaAtual = 4;
         int colSala = 2;
         int colQtd = 30;
         int colHoras = 48;
         
-        tela.EscreverNaAcao(linhaAtual, colSala, "Sala");
-        tela.EscreverNaAcao(linhaAtual, colQtd, "Qtd. Reservas");
-        tela.EscreverNaAcao(linhaAtual, colHoras, "Total Horas Ocupadas");
+        Console.SetCursorPosition(colSala, linhaAtual); Console.Write("Sala");
+        Console.SetCursorPosition(colQtd, linhaAtual); Console.Write("Qtd. Reservas");
+        Console.SetCursorPosition(colHoras, linhaAtual); Console.Write("Total Horas Ocupadas");
         linhaAtual++;
-        tela.EscreverNaAcao(linhaAtual++, new string('-', 66));
+        Console.SetCursorPosition(colSala, linhaAtual); Console.Write(new string('─', 100));
+        linhaAtual++;
 
         foreach (var item in ocupacaoPorSala)
         {
-            if (linhaAtual >= 24) 
+            if (linhaAtual >= 25) 
             {
-                tela.MostrarMensagemRodape("Muitos dados para exibir. Pressione Enter...");
-                Console.ReadKey();
-                tela.LimparJanelaAcao();
-                tela.DesenharJanelaAcao("TAXA DE OCUPAÇÃO");
-                linhaAtual = 3;
+                tela.Pausa("Muitos dados para exibir. Pressione Enter...");
+                tela.PrepararTelaPrincipal("TAXA DE OCUPAÇÃO");
+                linhaAtual = 5;
             }
             
-            tela.EscreverNaAcao(linhaAtual, colSala, item.Sala);
-            tela.EscreverNaAcao(linhaAtual, colQtd, item.QtdReservas.ToString());
-            tela.EscreverNaAcao(linhaAtual, colHoras, $"{item.TotalHoras:F1} horas");
+            Console.SetCursorPosition(colSala, linhaAtual); Console.Write(item.Sala);
+            Console.SetCursorPosition(colQtd, linhaAtual); Console.Write(item.QtdReservas.ToString());
+            Console.SetCursorPosition(colHoras, linhaAtual); Console.Write($"{item.TotalHoras:F1} horas");
             linhaAtual++;
         }
         
-        tela.MostrarMensagemRodape("Pressione Enter para voltar ao menu de relatórios...");
-        Console.ReadKey();
+        tela.Pausa("Fim do relatório. Pressione Enter para voltar...");
     }
-
     private void GerarRelatorioFaturamentoServicos()
     {
-        tela.DesenharJanelaAcao("FATURAMENTO POR SERVIÇO");
+        tela.PrepararTelaPrincipal("RELATÓRIO: FATURAMENTO POR SERVIÇO");
         
-        var reservas = reservaCRUD.GetReservas().Where(r => r.StatusReserva == "Confirmada").ToList();
+        var reservas = reservaCRUD.Reservas().Where(r => r.StatusReserva == "Confirmada").ToList();
         
         if (reservas.Count == 0)
         {
-            tela.MostrarMensagemRodape("Nenhuma reserva confirmada para exibir. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Nenhuma reserva confirmada para exibir. Pressione Enter.");
             return;
         }
 
@@ -128,36 +117,122 @@ public class RelatorioCRUD
             })
             .OrderByDescending(x => x.TotalValor);
 
-        int linhaAtual = 3;
-        
+        int linhaAtual = 4;
         int colRec = 2;
         int colQtd = 30;
         int colValor = 48;
         
-        tela.EscreverNaAcao(linhaAtual, colRec, "Recurso Adicional");
-        tela.EscreverNaAcao(linhaAtual, colQtd, "Qtd. Vendida");
-        tela.EscreverNaAcao(linhaAtual, colValor, "Faturamento Total");
+        Console.SetCursorPosition(colRec, linhaAtual); Console.Write("Recurso Adicional");
+        Console.SetCursorPosition(colQtd, linhaAtual); Console.Write("Qtd. Vendida");
+        Console.SetCursorPosition(colValor, linhaAtual); Console.Write("Faturamento Total");
         linhaAtual++;
-        tela.EscreverNaAcao(linhaAtual++, new string('-', 66));
+        Console.SetCursorPosition(colRec, linhaAtual); Console.Write(new string('─', 100));
+        linhaAtual++;
 
         foreach (var item in faturamentoItens)
         {
-             if (linhaAtual >= 24)
+             if (linhaAtual >= 25)
             {
-                tela.MostrarMensagemRodape("Muitos dados para exibir. Pressione Enter...");
-                Console.ReadKey();
-                tela.LimparJanelaAcao();
-                tela.DesenharJanelaAcao("FATURAMENTO POR SERVIÇO");
-                linhaAtual = 3;
+                tela.Pausa("Muitos dados para exibir. Pressione Enter...");
+                tela.PrepararTelaPrincipal("FATURAMENTO POR SERVIÇO");
+                linhaAtual = 5;
             }
              
-            tela.EscreverNaAcao(linhaAtual, colRec, item.Recurso);
-            tela.EscreverNaAcao(linhaAtual, colQtd, item.TotalQtd.ToString());
-            tela.EscreverNaAcao(linhaAtual, colValor, $"R$ {item.TotalValor:F2}");
+            Console.SetCursorPosition(colRec, linhaAtual); Console.Write(item.Recurso);
+            Console.SetCursorPosition(colQtd, linhaAtual); Console.Write(item.TotalQtd.ToString());
+            Console.SetCursorPosition(colValor, linhaAtual); Console.Write($"R$ {item.TotalValor:F2}");
             linhaAtual++;
         }
         
-        tela.MostrarMensagemRodape("Pressione Enter para voltar ao menu de relatórios...");
-        Console.ReadKey();
+        tela.Pausa("Fim do relatório. Pressione Enter para voltar...");
+    }
+    
+    private void GerarRelatorioHistorico()
+    {
+        tela.PrepararTelaPrincipal("RELATÓRIO: HISTÓRICO DE RESERVAS");
+        string filtro = tela.PerguntarRodape("Filtrar por Cliente ou Sala (C/S)? ");
+        
+        List<Reserva> reservasFiltradas = new List<Reserva>();
+        string tituloFiltro = "Histórico Completo";
+        
+        var todasReservas = reservaCRUD.Reservas();
+
+        if (filtro.ToUpper() == "C")
+        {
+            string cpf = tela.PerguntarRodape("Digite o CPF do Cliente: ");
+            reservasFiltradas = todasReservas.Where(r => r.cliente.cpf == cpf).ToList();
+            tituloFiltro = $"Histórico para CPF: {cpf}";
+        }
+        else if (filtro.ToUpper() == "S")
+        {
+            string nomeSala = tela.PerguntarRodape("Digite o Nome da Sala: ");
+            reservasFiltradas = todasReservas.Where(r => r.sala.nome.Equals(nomeSala, StringComparison.OrdinalIgnoreCase)).ToList();
+            tituloFiltro = $"Histórico para Sala: {nomeSala}";
+        }
+        else
+        {
+            tela.Pausa("Opção de filtro inválida. Pressione Enter.");
+            return;
+        }
+        
+        tela.PrepararTelaPrincipal(tituloFiltro);
+
+        if (reservasFiltradas.Count == 0)
+        {
+            tela.Pausa("Nenhum histórico encontrado para este filtro. Pressione Enter.");
+            return;
+        }
+
+        int linhaAtual = 4;
+        int colId = 2;
+        int colDinamica = 8; 
+        int colIni = 30;
+        int colFim = 52; 
+        int colStatus = 74;
+
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write("ID");
+        if(filtro.ToUpper() == "C") 
+        {
+            Console.SetCursorPosition(colDinamica, linhaAtual); Console.Write("Sala");
+        }
+        else 
+        {
+            Console.SetCursorPosition(colDinamica, linhaAtual); Console.Write("Cliente");
+        }
+        Console.SetCursorPosition(colIni, linhaAtual); Console.Write("Início (dd/MM HH:mm)");
+        Console.SetCursorPosition(colFim, linhaAtual); Console.Write("Fim (dd/MM HH:mm)");
+        Console.SetCursorPosition(colStatus, linhaAtual); Console.Write("Status");
+        linhaAtual++;
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 100));
+        linhaAtual++;
+        
+        foreach (var r in reservasFiltradas.OrderBy(r => r.DataHoraInicio))
+        {
+            if (linhaAtual >= 25) 
+            {
+                tela.Pausa("Muitos registros. Pressione Enter para continuar...");
+                tela.PrepararTelaPrincipal(tituloFiltro);
+                linhaAtual = 5;
+            }
+            
+            Console.SetCursorPosition(colId, linhaAtual); Console.Write(r.id.ToString());
+            
+            if (filtro.ToUpper() == "C")
+            {
+                Console.SetCursorPosition(colDinamica, linhaAtual); Console.Write(r.sala.nome);
+            } 
+            else 
+            {
+                Console.SetCursorPosition(colDinamica, linhaAtual); Console.Write(r.cliente.nome);
+            }
+
+            Console.SetCursorPosition(colIni, linhaAtual); Console.Write(r.DataHoraInicio.ToString("dd/MM HH:mm"));
+            Console.SetCursorPosition(colFim, linhaAtual); Console.Write(r.DataHoraFim.ToString("dd/MM HH:mm"));
+            Console.SetCursorPosition(colStatus, linhaAtual); Console.Write(r.StatusReserva);
+            
+            linhaAtual++;
+        }
+        
+        tela.Pausa("Fim do relatório. Pressione Enter para voltar...");
     }
 }

@@ -1,6 +1,5 @@
 public class Tela
 {
-    // propriedades de layout
     private int larguraTotal = 102; 
     private int alturaTotal = 28;  
     private int menuCol = 2;
@@ -20,8 +19,6 @@ public class Tela
         Console.SetWindowSize(this.larguraTotal + 1, this.alturaTotal + 1);
         Console.Clear();
     }
-
-    // métodos
 
     public void PrepararTelaPrincipal(string titulo)
     {
@@ -100,12 +97,12 @@ public class Tela
     {
         EscreverNaAcao(linhaRelativa, 2, texto);
     }
+    
     public void EscreverNaAcao(int linhaRelativa, int colRelativa, string texto)
     {
         int col = this.acaoCol + colRelativa;
         int lin = this.acaoLin + linhaRelativa;
         
-        // calcula o espaço máximo restante a partir da coluna
         int maxWidth = (this.acaoCol + this.acaoLarg) - col - 1;
         if(maxWidth < 0) maxWidth = 0;
 
@@ -188,7 +185,7 @@ public class Tela
         Console.SetCursorPosition(ci, li); Console.Write("╠");
         for (int c = ci + 1; c < cf; c++)
         {
-            Console.Write("═");
+            Console.Write("─");
         }
         Console.SetCursorPosition(cf, li); Console.Write("╣");
         
@@ -209,6 +206,13 @@ public class Tela
         int coluna = (larguraTotal - msg.Length) / 2;
         Console.SetCursorPosition(coluna, alturaTotal - 1);
         Console.Write(msg);
+    }
+
+    public void Pausa(string msg)
+    {
+        MostrarMensagemRodape(msg);
+        Console.ReadKey();
+        MostrarMensagemRodape("");
     }
 
     public string PerguntarRodape(string pergunta)

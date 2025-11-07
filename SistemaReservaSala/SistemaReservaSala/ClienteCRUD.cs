@@ -12,6 +12,9 @@ public class ClienteCRUD
         this.clientes = new List<Cliente>();
         this.cliente = new Cliente();
         this.posicao = -1;
+        
+        this.clientes.Add(new Cliente(proximoID++, "Joao", "1", "joao@gmail.com", "(47) 93456-7890"));
+        this.clientes.Add(new Cliente(proximoID++, "Maria", "2", "maria@gmail.com", "(11) 96654-3210"));
     }
     
     public void ExecutarCRUD()
@@ -26,8 +29,11 @@ public class ClienteCRUD
         
         while(true)
         {
+            tela.PrepararTelaPrincipal("Gestão de Aluguéis de Salas de Reunião - Gestão de Clientes");
+
             tela.LimparJanelaAcao();
             
+            tela.LimparJanelaMenu();
             opcao = tela.DesenharMenu("GESTÃO DE CLIENTES", opcoes);
 
             switch (opcao)
@@ -36,11 +42,8 @@ public class ClienteCRUD
                 case "2": EditarCliente(); break;
                 case "3": ConsultarCliente(); break;
                 case "4": ListarClientes(); break;
-                case "0": tela.LimparJanelaMenu(); return; 
-                default:
-                    tela.MostrarMensagemRodape("Opção inválida. Pressione Enter.");
-                    Console.ReadKey();
-                    break;
+                case "0": return; 
+                default:tela.Pausa("Opção inválida. Pressione Enter."); break;
             }
         }
     }
@@ -59,49 +62,42 @@ public class ClienteCRUD
         if (string.IsNullOrWhiteSpace(cliente.nome) || string.IsNullOrWhiteSpace(cliente.cpf) ||
             string.IsNullOrWhiteSpace(cliente.email) || string.IsNullOrWhiteSpace(cliente.telefone))
         {
-            tela.MostrarMensagemRodape("Erro: Todos os campos são obrigatórios. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Todos os campos são obrigatórios. Pressione Enter.");
             return; 
         }
 
         if (ProcurarPorDocumento(cliente.cpf) != null)
         {
-            tela.MostrarMensagemRodape("Erro: Este CPF já está cadastrado. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Este CPF já está cadastrado. Pressione Enter.");
             return;
         }
         
         if (ProcurarPorEmail(cliente.email) != null)
         {
-            tela.MostrarMensagemRodape("Erro: Este Email já está cadastrado. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Este Email já está cadastrado. Pressione Enter.");
             return;
         }
 
         cliente.id = this.proximoID++;
         this.clientes.Add(cliente);
-        tela.MostrarMensagemRodape("Cliente cadastrado com sucesso! Pressione Enter.");
-        Console.ReadKey();
+        tela.Pausa("Cliente cadastrado com sucesso! Pressione Enter.");
     }
 
     private void EditarCliente()
     {
         string doc = tela.PerguntarRodape("Digite o CPF do cliente para editar: ");
-
+        
         Cliente clienteParaEditar = ProcurarPorDocumento(doc);
-
+        
         if (clienteParaEditar == null)
         {
-            tela.MostrarMensagemRodape("Cliente não encontrado. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Cliente não encontrado. Pressione Enter.");
             return;
         }
-
+        
         this.posicao = clientes.IndexOf(clienteParaEditar);
-
         tela.DesenharJanelaAcao("EDITAR CLIENTE");
-
-        int linDiv = 7;
+        int linDiv = 7; 
         tela.DesenharDivisoriaAcao(linDiv, " DADOS ATUAIS ");
 
         tela.EscreverNaAcao(linDiv + 2, $"Nome: {clienteParaEditar.nome}");
@@ -118,9 +114,8 @@ public class ClienteCRUD
             Cliente emailDuplicado = ProcurarPorEmail(email);
             if (emailDuplicado != null && emailDuplicado.id != clienteParaEditar.id)
             {
-                tela.MostrarMensagemRodape("Erro: Este Email já pertence a outro cliente. Pressione Enter.");
-                Console.ReadKey();
-                return;
+                 tela.Pausa("Erro: Este Email já pertence a outro cliente. Pressione Enter.");
+                 return;
             }
             clienteParaEditar.email = email;
         }
@@ -129,11 +124,9 @@ public class ClienteCRUD
         if (!string.IsNullOrWhiteSpace(tel)) clienteParaEditar.telefone = tel;
 
         this.clientes[this.posicao] = clienteParaEditar;
-
-        tela.MostrarMensagemRodape("Cliente atualizado com sucesso! Pressione Enter.");
-        Console.ReadKey();
+        
+        tela.Pausa("Cliente atualizado com sucesso! Pressione Enter.");
     }
-
     private void ConsultarCliente()
     {
         string doc = tela.PerguntarRodape("Digite o CPF do cliente para consultar: ");
@@ -141,71 +134,65 @@ public class ClienteCRUD
         this.cliente = ProcurarPorDocumento(doc);
         if (this.cliente == null)
         {
-            tela.MostrarMensagemRodape("Cliente não encontrado. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Cliente não encontrado. Pressione Enter.");
             return;
         }
         
         tela.DesenharJanelaAcao("CONSULTAR CLIENTE");
-
         tela.EscreverNaAcao(3, $"ID: {cliente.id}");
         tela.EscreverNaAcao(4, $"Nome: {cliente.nome}");
         tela.EscreverNaAcao(5, $"CPF: {cliente.cpf}");
         tela.EscreverNaAcao(6, $"Email: {cliente.email}");
         tela.EscreverNaAcao(7, $"Telefone: {cliente.telefone}");
         
-        tela.MostrarMensagemRodape("Pressione Enter para voltar ao menu de clientes...");
-        Console.ReadKey();
+        tela.Pausa("Pressione Enter para voltar ao menu de clientes...");
     }
 
     private void ListarClientes()
     {
-        tela.DesenharJanelaAcao("LISTAGEM DE CLIENTES");
+        tela.PrepararTelaPrincipal("LISTAGEM DE CLIENTES");
 
         if (clientes.Count == 0)
         {
-            tela.MostrarMensagemRodape("Nenhum cliente cadastrado. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Nenhum cliente cadastrado. Pressione Enter.");
             return;
         }
 
-        int linhaAtual = 3; 
+        int linhaAtual = 4; 
         
         int colId = 2;
-        int colNome = 7;
-        int colCpf = 28;
-        int colEmail = 44;
-        int colTel = 65; 
+        int colNome = 8;
+        int colCpf = 35;
+        int colEmail = 55;
+        int colTel = 85; 
 
-        tela.EscreverNaAcao(linhaAtual, colId, "ID");
-        tela.EscreverNaAcao(linhaAtual, colNome, "Nome");
-        tela.EscreverNaAcao(linhaAtual, colCpf, "CPF");
-        tela.EscreverNaAcao(linhaAtual, colEmail, "E-mail");
-        tela.EscreverNaAcao(linhaAtual, colTel, "Telefone");
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write("ID");
+        Console.SetCursorPosition(colNome, linhaAtual); Console.Write("Nome");
+        Console.SetCursorPosition(colCpf, linhaAtual); Console.Write("CPF");
+        Console.SetCursorPosition(colEmail, linhaAtual); Console.Write("E-mail");
+        Console.SetCursorPosition(colTel, linhaAtual); Console.Write("Telefone");
         linhaAtual++;
-        tela.EscreverNaAcao(linhaAtual++, new string('-', 66));
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 100));
+        linhaAtual++;
         
         foreach (var c in clientes)
         {
-            if (linhaAtual >= 24)
+            if (linhaAtual >= 25) 
             {
-                tela.MostrarMensagemRodape("Muitos clientes para exibir. Pressione Enter...");
-                Console.ReadKey();
-                tela.LimparJanelaAcao();
-                tela.DesenharJanelaAcao("LISTAGEM DE CLIENTES");
-                linhaAtual = 3;
+                tela.Pausa("Muitos clientes para exibir. Pressione Enter...");
+                tela.PrepararTelaPrincipal("LISTAGEM DE CLIENTES");
+                linhaAtual = 5; 
             }
             
-            tela.EscreverNaAcao(linhaAtual, colId, c.id.ToString());
-            tela.EscreverNaAcao(linhaAtual, colNome, c.nome);
-            tela.EscreverNaAcao(linhaAtual, colCpf, c.cpf);
-            tela.EscreverNaAcao(linhaAtual, colEmail, c.email);
-            tela.EscreverNaAcao(linhaAtual, colTel, c.telefone);
+            Console.SetCursorPosition(colId, linhaAtual); Console.Write(c.id.ToString());
+            Console.SetCursorPosition(colNome, linhaAtual); Console.Write(c.nome);
+            Console.SetCursorPosition(colCpf, linhaAtual); Console.Write(c.cpf);
+            Console.SetCursorPosition(colEmail, linhaAtual); Console.Write(c.email);
+            Console.SetCursorPosition(colTel, linhaAtual); Console.Write(c.telefone);
             linhaAtual++;
         }
 
-        tela.MostrarMensagemRodape("Pressione Enter para voltar ao menu de clientes...");
-        Console.ReadKey();
+        tela.Pausa("Pressione Enter para voltar ao menu de clientes...");
     }
     
     public Cliente ProcurarPorDocumento(string cpf)

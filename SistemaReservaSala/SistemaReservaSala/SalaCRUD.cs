@@ -13,8 +13,10 @@ public class SalaCRUD
         this.salas = new List<Sala>();
         this.sala = new Sala();
         this.posicao = -1;
+        
+        this.salas.Add(new Sala(proximoID++, "Delta", 10, 50.00m, new List<string>{"Wi-Fi", "Quadro Branco"}));
+        this.salas.Add(new Sala(proximoID++, "Alpha", 8, 150.00m, new List<string>{"Wi-Fi Premium", "Projetor", "Café"}));
     }
-    
     public void ExecutarCRUD()
     {
         string opcao;
@@ -27,8 +29,11 @@ public class SalaCRUD
         
         while(true)
         {
+            tela.PrepararTelaPrincipal("Gestão de Aluguéis de Salas de Reunião - Gestão de Salas");
+            
             tela.LimparJanelaAcao();
             
+            tela.LimparJanelaMenu();
             opcao = tela.DesenharMenu("GESTÃO DE SALAS", opcoes);
 
             switch (opcao)
@@ -36,12 +41,9 @@ public class SalaCRUD
                 case "1": CadastrarSala(); break;
                 case "2": EditarSala(); break;
                 case "3": ConsultarSala(); break;
-                case "4": ListarSalas(); break;
-                case "0": tela.LimparJanelaMenu(); return; 
-                default:
-                    tela.MostrarMensagemRodape("Opção inválida. Pressione Enter.");
-                    Console.ReadKey();
-                    break;
+                case "4": ListarSalas(); break; 
+                case "0": return; 
+                default: tela.Pausa("Opção inválida. Pressione Enter."); break;
             }
         }
     }
@@ -50,8 +52,7 @@ public class SalaCRUD
     {
         if (this.salas.Count >= LIMITE_SALAS)
         {
-            tela.MostrarMensagemRodape($"ERRO: O limite máximo de {LIMITE_SALAS} salas foi atingido. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa($"ERRO: O limite máximo de {LIMITE_SALAS} salas foi atingido. Pressione Enter.");
             return;
         }
 
@@ -59,34 +60,28 @@ public class SalaCRUD
         this.sala = new Sala();
 
         sala.nome = tela.PerguntarNaAcao(3, "Nome da Sala: ");
-        
         int.TryParse(tela.PerguntarNaAcao(4, "Capacidade (Pessoas): "), out int cap);
         sala.capacidade = cap;
-
         decimal.TryParse(tela.PerguntarNaAcao(5, "Valor por Hora (R$): "), out decimal val);
         sala.valorHora = val;
-        
         string recursos = tela.PerguntarNaAcao(6, "Recursos Fixos (Ex: Projetor, Wi-Fi): ");
         sala.recursosFixos.AddRange(recursos.Split(','));
 
         if (string.IsNullOrWhiteSpace(sala.nome) || sala.capacidade <= 0 || sala.valorHora <= 0)
         {
-            tela.MostrarMensagemRodape("Erro: Nome, Capacidade (>0) e Valor (>0) são obrigatórios. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Nome, Capacidade (>0) e Valor (>0) são obrigatórios. Pressione Enter.");
             return;
         }
 
         if (ProcurarPorNome(sala.nome) != null)
         {
-            tela.MostrarMensagemRodape("Erro: Já existe uma sala com este nome. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Já existe uma sala com este nome. Pressione Enter.");
             return;
         }
 
         sala.id = this.proximoID++;
         this.salas.Add(sala);
-        tela.MostrarMensagemRodape("Sala cadastrada com sucesso! Pressione Enter.");
-        Console.ReadKey();
+        tela.Pausa("Sala cadastrada com sucesso! Pressione Enter.");
     }
 
     private void EditarSala()
@@ -96,13 +91,11 @@ public class SalaCRUD
         Sala salaParaEditar = ProcurarPorNome(nomeBusca);
         if (salaParaEditar == null)
         {
-            tela.MostrarMensagemRodape("Sala não encontrada. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Sala não encontrada. Pressione Enter.");
             return;
         }
         
         this.posicao = salas.IndexOf(salaParaEditar);
-
         tela.DesenharJanelaAcao("EDITAR SALA");
         int linDiv = 7; 
         tela.DesenharDivisoriaAcao(linDiv, " DADOS ATUAIS ");
@@ -115,14 +108,12 @@ public class SalaCRUD
         string capStr = tela.PerguntarNaAcao(4, $"Nova Capacidade [{salaParaEditar.capacidade}]: ");
         string valStr = tela.PerguntarNaAcao(5, $"Novo Valor/Hora [{salaParaEditar.valorHora:F2}]: ");
 
-
         if (!string.IsNullOrWhiteSpace(nome))
         {
              Sala nomeDuplicado = salas.Find(s => s.nome.Equals(nome, StringComparison.OrdinalIgnoreCase) && s.id != salaParaEditar.id);
              if (nomeDuplicado != null)
              {
-                 tela.MostrarMensagemRodape("Erro: Este Nome de Sala já está cadastrado. Tente outro nome. Pressione Enter.");
-                 Console.ReadKey();
+                 tela.Pausa("Erro: Este Nome de Sala já está cadastrado. Tente outro nome. Pressione Enter.");
                  return;
              }
              salaParaEditar.nome = nome;
@@ -132,8 +123,7 @@ public class SalaCRUD
         if (decimal.TryParse(valStr, out decimal val) && val > 0) salaParaEditar.valorHora = val;
 
         this.salas[this.posicao] = salaParaEditar;
-        tela.MostrarMensagemRodape("Sala atualizada com sucesso! Pressione Enter.");
-        Console.ReadKey();
+        tela.Pausa("Sala atualizada com sucesso! Pressione Enter.");
     }
 
     private void ConsultarSala()
@@ -143,68 +133,64 @@ public class SalaCRUD
         this.sala = ProcurarPorNome(nomeBusca);
         if (this.sala == null)
         {
-            tela.MostrarMensagemRodape("Sala não encontrada. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Sala não encontrada. Pressione Enter.");
             return;
         }
 
         tela.DesenharJanelaAcao("CONSULTAR SALA");
-
         tela.EscreverNaAcao(3, $"ID: {sala.id}");
         tela.EscreverNaAcao(4, $"Nome: {sala.nome}");
         tela.EscreverNaAcao(5, $"Capacidade: {sala.capacidade} pessoas");
         tela.EscreverNaAcao(6, $"Valor/Hora: R$ {sala.valorHora:F2}");
         tela.EscreverNaAcao(7, $"Recursos: {string.Join(", ", sala.recursosFixos)}");
         
-        tela.MostrarMensagemRodape("Pressione Enter para voltar ao menu de salas...");
-        Console.ReadKey();
+        tela.Pausa("Pressione Enter para voltar ao menu de salas...");
     }
-
     private void ListarSalas()
     {
-        tela.DesenharJanelaAcao("LISTAGEM DE SALAS");
+        tela.PrepararTelaPrincipal("LISTAGEM DE SALAS");
 
         if (salas.Count == 0)
         {
-            tela.MostrarMensagemRodape("Nenhuma sala cadastrada. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Nenhuma sala cadastrada. Pressione Enter.");
             return;
         }
 
-        int linhaAtual = 3;
+        int linhaAtual = 4;
         
         int colId = 2;
         int colNome = 7;
         int colCap = 30;
         int colValor = 45;
+        int colRec = 60;
 
-        tela.EscreverNaAcao(linhaAtual, colId, "ID");
-        tela.EscreverNaAcao(linhaAtual, colNome, "Nome da Sala");
-        tela.EscreverNaAcao(linhaAtual, colCap, "Capacidade");
-        tela.EscreverNaAcao(linhaAtual, colValor, "Valor/Hora");
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write("ID");
+        Console.SetCursorPosition(colNome, linhaAtual); Console.Write("Nome da Sala");
+        Console.SetCursorPosition(colCap, linhaAtual); Console.Write("Capacidade");
+        Console.SetCursorPosition(colValor, linhaAtual); Console.Write("Valor/Hora");
+        Console.SetCursorPosition(colRec, linhaAtual); Console.Write("Recursos Fixos");
         linhaAtual++;
-        tela.EscreverNaAcao(linhaAtual++, new string('-', 66));
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 100));
+        linhaAtual++;
         
         foreach (var s in salas)
         {
-            if (linhaAtual >= 24) 
+            if (linhaAtual >= 25) 
             {
-                tela.MostrarMensagemRodape("Muitas salas para exibir. Pressione Enter...");
-                Console.ReadKey();
-                tela.LimparJanelaAcao();
-                tela.DesenharJanelaAcao("LISTAGEM DE SALAS");
-                linhaAtual = 3;
+                tela.Pausa("Muitas salas para exibir. Pressione Enter...");
+                tela.PrepararTelaPrincipal("LISTAGEM DE SALAS");
+                linhaAtual = 5;
             }
 
-            tela.EscreverNaAcao(linhaAtual, colId, s.id.ToString());
-            tela.EscreverNaAcao(linhaAtual, colNome, s.nome);
-            tela.EscreverNaAcao(linhaAtual, colCap, s.capacidade.ToString());
-            tela.EscreverNaAcao(linhaAtual, colValor, $"R$ {s.valorHora:F2}");
+            Console.SetCursorPosition(colId, linhaAtual); Console.Write(s.id.ToString());
+            Console.SetCursorPosition(colNome, linhaAtual); Console.Write(s.nome);
+            Console.SetCursorPosition(colCap, linhaAtual); Console.Write(s.capacidade.ToString());
+            Console.SetCursorPosition(colValor, linhaAtual); Console.Write($"R$ {s.valorHora:F2}");
+            Console.SetCursorPosition(colRec, linhaAtual); Console.Write(string.Join(", ", s.recursosFixos));
             linhaAtual++;
         }
 
-        tela.MostrarMensagemRodape("Pressione Enter para voltar ao menu de salas...");
-        Console.ReadKey();
+        tela.Pausa("Pressione Enter para voltar ao menu de salas...");
     }
 
     public Sala ProcurarPorNome(string nome)

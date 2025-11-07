@@ -4,7 +4,7 @@ public class Reserva
     public Cliente cliente; 
     public Sala sala; 
     public DateTime DataHoraInicio; 
-    public DateTime DataHoraFim;
+    public DateTime DataHoraFim; 
 
     public List<ItemReserva> ItensConsumidos;
     public List<Pagamento> PagamentosRegistrados;
@@ -24,12 +24,12 @@ public class Reserva
         this.StatusReserva = "Pendente";
     }
 
-    // RN-014: Cálculo de Tarifa
     public void CalcularCustoTotal()
     {
         decimal valorBase = 0;
         TimeSpan duracao = DataHoraFim - DataHoraInicio;
-        double totalHoras = Math.Max(1, duracao.TotalHours); 
+
+        double totalHoras = duracao.TotalHours; 
 
         valorBase = (decimal)totalHoras * sala.valorHora;
 
@@ -42,8 +42,7 @@ public class Reserva
         this.ValorTotalCalculado = valorBase + valorItens;
     }
 
-    // Método auxiliar para RN-015
-    public decimal GetValorPagoTotal()
+    public decimal ValorPagoTotal()
     {
         decimal totalPago = 0;
         foreach (var pag in PagamentosRegistrados)
@@ -53,7 +52,6 @@ public class Reserva
         return totalPago;
     }
 
-    // Método auxiliar para RN-015
     public void AtualizarStatusReserva()
     {
         if (this.ValorTotalCalculado == 0)
@@ -61,8 +59,8 @@ public class Reserva
             this.StatusReserva = "Pendente";
             return;
         }
-        
-        decimal totalPago = GetValorPagoTotal();
+
+        decimal totalPago = ValorPagoTotal();
         decimal valorMinimo50 = this.ValorTotalCalculado * 0.5m;
 
         if (totalPago >= valorMinimo50)

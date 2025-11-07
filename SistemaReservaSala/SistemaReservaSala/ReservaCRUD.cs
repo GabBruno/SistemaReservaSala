@@ -1,4 +1,5 @@
-using System.Globalization; // utilizado para formatação da data/hora
+using System.Globalization;
+
 public class ReservaCRUD
 {
     private Tela tela;
@@ -29,79 +30,109 @@ public class ReservaCRUD
         opcoes.Add("[3] Listar Reservas Ativas");
         opcoes.Add("[4] Registrar Pagamento   ");
         opcoes.Add("[0] Voltar                ");
+        
         while (true)
         {
+            tela.PrepararTelaPrincipal("Gestão de Aluguéis de Salas de Reunião - Gestão de Reservas");
+
             tela.LimparJanelaAcao();
+            
+            tela.LimparJanelaMenu();
             opcao = tela.DesenharMenu("GESTÃO DE RESERVAS", opcoes);
 
             switch (opcao)
             {
                 case "1": CriarReserva(); break;
                 case "2": CancelarReserva(); break;
-                case "3": ListarReservas(); break;
+                case "3": ListarReservas(); break; 
                 case "4": RegistrarPagamentoExtra(); break;
-                case "0": tela.LimparJanelaMenu(); return; 
-                default:
-                    tela.MostrarMensagemRodape("Opção inválida. Pressione Enter.");
-                    Console.ReadKey();
-                    break;
+                case "0": return; 
+                default:tela.Pausa("Opção inválida. Pressione Enter.");break;
             }
         }
     }
 
     private void CriarReserva()
     {
-        tela.DesenharJanelaAcao("CRIAR NOVA RESERVA");
+        tela.DesenharJanelaAcao("RESERVAR SALA");
         this.reserva = new Reserva();
 
         string doc = tela.PerguntarNaAcao(3, "CPF do Cliente: ");
-        Cliente cliente = clienteCRUD.ProcurarPorDocumento(doc); 
+        Cliente? cliente = clienteCRUD.ProcurarPorDocumento(doc); 
         if (cliente == null)
         {
-            tela.MostrarMensagemRodape("Erro: Cliente não cadastrado. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Cliente não cadastrado. Pressione Enter.");
             return;
         }
         this.reserva.cliente = cliente;
         tela.EscreverNaAcao(3, $"CPF do Cliente: {cliente.cpf} - {cliente.nome}");
 
         string nomeSala = tela.PerguntarNaAcao(4, "Nome da Sala: ");
-        Sala sala = salaCRUD.ProcurarPorNome(nomeSala); 
+        Sala? sala = salaCRUD.ProcurarPorNome(nomeSala); 
         if (sala == null)
         {
-            tela.MostrarMensagemRodape("Erro: Sala não encontrada. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Sala não encontrada. Pressione Enter.");
             return;
         }
         this.reserva.sala = sala;
         tela.EscreverNaAcao(4, $"Nome da Sala: {sala.nome} (R$ {sala.valorHora}/h)");
         
-        try
+        DateTime dataInicio;
+        string dataInicioStr = tela.PerguntarNaAcao(5, "Data/Hora Início (dd/MM/yyyy HH:mm): ");
+        if (!DateTime.TryParseExact(dataInicioStr, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dataInicio))
         {
-            string dataInicioStr = tela.PerguntarNaAcao(5, "Data/Hora Início (dd/MM/yyyy HH:mm): ");
-            reserva.DataHoraInicio = DateTime.ParseExact(dataInicioStr, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-
-            string dataFimStr = tela.PerguntarNaAcao(6, "Data/Hora Fim (dd/MM/yyyy HH:mm): ");
-            reserva.DataHoraFim = DateTime.ParseExact(dataFimStr, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-
-            if (reserva.DataHoraFim <= reserva.DataHoraInicio)
-            {
-                tela.MostrarMensagemRodape("Erro: A data/hora final deve ser maior que a inicial. Pressione Enter.");
-                Console.ReadKey();
-                return;
-            }
-
-            if (!VerificarDisponibilidadeSala(sala, reserva.DataHoraInicio, reserva.DataHoraFim))
-            {
-                tela.MostrarMensagemRodape("Erro: Sala ocupada neste período (Overbooking). Pressione Enter.");
-                Console.ReadKey();
-                return;
-            }
+            tela.Pausa("Erro: Formato de data/hora de INÍCIO inválido. Use dd/MM/yyyy HH:mm. Pressione Enter.");
+            return;
         }
-        catch (FormatException)
+
+        DateTime dataFim;
+        string dataFimStr = tela.PerguntarNaAcao(6, "Data/Hora Fim (dd/MM/yyyy HH:mm): ");
+        if (!DateTime.TryParseExact(dataFimStr, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dataFim))
         {
-            tela.MostrarMensagemRodape("Erro: Formato de data/hora inválido. Use dd/MM/yyyy HH:mm. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Formato de data/hora de FIM inválido. Use dd/MM/yyyy HH:mm. Pressione Enter.");
+            return;
+        }
+
+        reserva.DataHoraInicio = dataInicio;
+        reserva.DataHoraFim = dataFim;
+
+        if (reserva.DataHoraFim <= reserva.DataHoraInicio)
+        {
+            tela.Pausa("Erro: A data/hora final deve ser maior que a inicial. Pressione Enter.");
+            return;
+        }
+        
+        TimeSpan inicioOperacao = new TimeSpan(8, 0, 0); 
+        TimeSpan maxInicioOperacao = new TimeSpan(21, 30, 0);
+        TimeSpan minFimOperacao = new TimeSpan(8, 30, 0); 
+        TimeSpan fimOperacao = new TimeSpan(22, 0, 0);   
+
+        if (dataInicio.DayOfWeek == DayOfWeek.Sunday || dataFim.DayOfWeek == DayOfWeek.Sunday)
+        {
+            tela.Pausa("Erro: O espaço não opera aos domingos. Pressione Enter.");
+            return;
+        }
+        if (dataInicio.TimeOfDay < inicioOperacao || dataInicio.TimeOfDay > maxInicioOperacao)
+        {
+            tela.Pausa("Erro: O horário de INÍCIO deve ser entre 8h00 e 21h30. Pressione Enter.");
+            return;
+        }
+        if (dataFim.TimeOfDay < minFimOperacao || dataFim.TimeOfDay > fimOperacao)
+        {
+            tela.Pausa("Erro: O horário de TÉRMINO deve ser entre 8h30 e 22h00. Pressione Enter.");
+            return;
+        }
+        
+        TimeSpan duracao = reserva.DataHoraFim - reserva.DataHoraInicio;
+        if (duracao.TotalMinutes % 30 != 0)
+        {
+            tela.Pausa("Erro: O período (duração) da reserva deve ser em múltiplos de 30 minutos. Pressione Enter.");
+            return;
+        }
+
+        if (!VerificarDisponibilidadeSala(sala, reserva.DataHoraInicio, reserva.DataHoraFim))
+        {
+            tela.Pausa("Erro: Sala ocupada neste período (Overbooking). Pressione Enter.");
             return;
         }
         
@@ -110,19 +141,17 @@ public class ReservaCRUD
         {
             if (linhaRecurso > 15) 
             {
-                tela.MostrarMensagemRodape("Limite de recursos atingido. Pressione Enter.");
-                Console.ReadKey();
+                tela.Pausa("Limite de recursos atingido. Pressione Enter.");
                 break;
             }
             
             string nomeRecurso = tela.PerguntarNaAcao(linhaRecurso, "Adicionar Recurso (Pule com Enter): ");
             if (string.IsNullOrWhiteSpace(nomeRecurso)) break;
 
-            Recurso recurso = recursoCRUD.ProcurarPorNome(nomeRecurso);
+            Recurso? recurso = recursoCRUD.ProcurarPorNome(nomeRecurso);
             if (recurso == null)
             {
-                tela.MostrarMensagemRodape("Recurso não encontrado. Tente novamente.");
-                Console.ReadKey();
+                tela.Pausa("Recurso não encontrado. Tente novamente.");
                 tela.ApagarArea(36, 3 + linhaRecurso, 100, 3 + linhaRecurso);
                 continue;
             }
@@ -142,21 +171,18 @@ public class ReservaCRUD
             }
             else
             {
-                tela.MostrarMensagemRodape($"Erro: Estoque insuficiente de '{recurso.nome}'. (Disponível: {recurso.QuantidadeEmEstoque})");
-                Console.ReadKey();
+                tela.Pausa($"Erro: Estoque insuficiente de '{recurso.nome}'. (Disponível: {recurso.QuantidadeEmEstoque})");
                 tela.ApagarArea(36, 3 + linhaRecurso, 100, 3 + linhaRecurso + 1);
             }
         }
 
-        // calcular custo
         reserva.CalcularCustoTotal();
         tela.MostrarMensagemRodape($"Custo Total da Reserva: R$ {reserva.ValorTotalCalculado:F2}. Pressione Enter para pagar.");
         Console.ReadKey();
+        tela.MostrarMensagemRodape(""); 
         
-        // registrar pagamento
         RegistrarPagamento(reserva, true); 
         
-        // salvar e baixar estoque
         if (reserva.StatusReserva == "Confirmada") 
         {
             reserva.id = this.proximoID++;
@@ -167,27 +193,23 @@ public class ReservaCRUD
                 recursoCRUD.BaixarEstoque(item.Recurso, item.QuantidadeSolicitada);
             }
 
-            tela.MostrarMensagemRodape($"Reserva (ID {reserva.id}) criada. Status: {reserva.StatusReserva}. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa($"Reserva (ID {reserva.id}) criada. Status: {reserva.StatusReserva}. Pressione Enter.");
         }
         else
         {
-            tela.MostrarMensagemRodape("Pagamento mínimo não efetuado. Reserva não confirmada. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Pagamento mínimo não efetuado. Reserva não confirmada. Pressione Enter.");
         }
     }
 
-    // cancelamento
     private void CancelarReserva()
     {
         string idBuscaStr = tela.PerguntarRodape("Digite o ID da Reserva para cancelar: ");
         int.TryParse(idBuscaStr, out int idBusca);
 
-        Reserva res = reservas.Find(r => r.id == idBusca && r.StatusReserva != "Cancelada");
+        Reserva? res = reservas.Find(r => r.id == idBusca && r.StatusReserva != "Cancelada");
         if (res == null)
         {
-            tela.MostrarMensagemRodape("Reserva não encontrada ou já cancelada. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Reserva não encontrada ou já cancelada. Pressione Enter.");
             return;
         }
 
@@ -195,7 +217,7 @@ public class ReservaCRUD
         tela.EscreverNaAcao(3, $"Cliente: {res.cliente.nome}");
         tela.EscreverNaAcao(4, $"Sala: {res.sala.nome}");
         tela.EscreverNaAcao(5, $"Início: {res.DataHoraInicio:g}");
-        tela.EscreverNaAcao(6, $"Valor Pago: R$ {res.GetValorPagoTotal():F2}");
+        tela.EscreverNaAcao(6, $"Valor Pago: R$ {res.ValorPagoTotal()}");
 
         TimeSpan tempoAteInicio = res.DataHoraInicio - DateTime.Now;
 
@@ -211,81 +233,79 @@ public class ReservaCRUD
         
         res.StatusReserva = "Cancelada";
         
-        tela.MostrarMensagemRodape("Reserva cancelada. Pressione Enter.");
-        Console.ReadKey();
+        tela.Pausa("Reserva cancelada. Pressione Enter.");
     }
     
-    private void ListarReservas()
+     private void ListarReservas()
     {
-        tela.DesenharJanelaAcao("LISTAGEM DE RESERVAS ATIVAS");
+        tela.PrepararTelaPrincipal("LISTAGEM DE RESERVAS ATIVAS");
+        
         var reservasAtivas = reservas.Where(r => r.StatusReserva != "Cancelada" && r.DataHoraFim > DateTime.Now).ToList();
         
         if (reservasAtivas.Count == 0)
         {
-            tela.MostrarMensagemRodape("Nenhuma reserva ativa encontrada. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Nenhuma reserva ativa encontrada. Pressione Enter.");
             return;
         }
 
-        int linhaAtual = 3;
+        int linhaAtual = 4;
         
         int colId = 2;
         int colCli = 7;
-        int colSala = 23;
-        int colIni = 39;
-        int colStatus = 57;
+        int colSala = 28;
+        int colIni = 44;
+        int colStatus = 68;
+        int colPago = 82;
 
-        tela.EscreverNaAcao(linhaAtual, colId, "ID");
-        tela.EscreverNaAcao(linhaAtual, colCli, "Cliente");
-        tela.EscreverNaAcao(linhaAtual, colSala, "Sala");
-        tela.EscreverNaAcao(linhaAtual, colIni, "Início (dd/MM HH:mm)");
-        tela.EscreverNaAcao(linhaAtual, colStatus, "Status");
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write("ID");
+        Console.SetCursorPosition(colCli, linhaAtual); Console.Write("Cliente");
+        Console.SetCursorPosition(colSala, linhaAtual); Console.Write("Sala");
+        Console.SetCursorPosition(colIni, linhaAtual); Console.Write("Início (dd/MM HH:mm)");
+        Console.SetCursorPosition(colStatus, linhaAtual); Console.Write("Status");
+        Console.SetCursorPosition(colPago, linhaAtual); Console.Write("Valor Pago");
         linhaAtual++;
-        tela.EscreverNaAcao(linhaAtual++, new string('-', 66));
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 100));
+        linhaAtual++;
         
         foreach (var r in reservasAtivas.OrderBy(r => r.DataHoraInicio))
         {
-            if (linhaAtual >= 24) 
+            if (linhaAtual >= 25) 
             {
-                tela.MostrarMensagemRodape("Muitas reservas para exibir. Pressione Enter...");
-                Console.ReadKey();
-                tela.LimparJanelaAcao();
-                tela.DesenharJanelaAcao("LISTAGEM DE RESERVAS ATIVAS");
-                linhaAtual = 3;
+                tela.Pausa("Muitas reservas para exibir. Pressione Enter...");
+                tela.PrepararTelaPrincipal("LISTAGEM DE RESERVAS ATIVAS");
+                linhaAtual = 5;
             }
             
-            tela.EscreverNaAcao(linhaAtual, colId, r.id.ToString());
-            tela.EscreverNaAcao(linhaAtual, colCli, r.cliente.nome);
-            tela.EscreverNaAcao(linhaAtual, colSala, r.sala.nome);
-            tela.EscreverNaAcao(linhaAtual, colIni, r.DataHoraInicio.ToString("dd/MM HH:mm"));
-            tela.EscreverNaAcao(linhaAtual, colStatus, r.StatusReserva);
+            Console.SetCursorPosition(colId, linhaAtual); Console.Write(r.id.ToString());
+            Console.SetCursorPosition(colCli, linhaAtual); Console.Write(r.cliente.nome);
+            Console.SetCursorPosition(colSala, linhaAtual); Console.Write(r.sala.nome);
+            Console.SetCursorPosition(colIni, linhaAtual); Console.Write(r.DataHoraInicio.ToString("dd/MM HH:mm"));
+            Console.SetCursorPosition(colStatus, linhaAtual); Console.Write(r.StatusReserva);
+            Console.SetCursorPosition(colPago, linhaAtual); Console.Write($"R$ {r.ValorPagoTotal():F2}");
             linhaAtual++;
         }
 
-        tela.MostrarMensagemRodape("Pressione Enter para voltar ao menu de reservas...");
-        Console.ReadKey();
+        tela.Pausa("Pressione Enter para voltar ao menu de reservas...");
     }
-
+    
     private void RegistrarPagamentoExtra()
     {
         string idBuscaStr = tela.PerguntarRodape("Digite o ID da Reserva para pagar: ");
         int.TryParse(idBuscaStr, out int idBusca);
 
-        Reserva res = reservas.Find(r => r.id == idBusca && r.StatusReserva != "Cancelada");
+        Reserva? res = reservas.Find(r => r.id == idBusca && r.StatusReserva != "Cancelada");
         if (res == null)
         {
-            tela.MostrarMensagemRodape("Reserva não encontrada. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Reserva não encontrada. Pressione Enter.");
             return;
         }
-
+        
         tela.DesenharJanelaAcao("REGISTRAR PAGAMENTO");
         RegistrarPagamento(res, false);
-
-        tela.MostrarMensagemRodape($"Pagamento registrado. Novo status: {res.StatusReserva}. Pressione Enter.");
-        Console.ReadKey();
+        
+        tela.Pausa($"Pagamento registrado. Novo status: {res.StatusReserva}. Pressione Enter.");
     }
-    
+
     private bool VerificarDisponibilidadeSala(Sala sala, DateTime inicio, DateTime fim)
     {
         foreach (var res in reservas)
@@ -304,7 +324,7 @@ public class ReservaCRUD
     private void RegistrarPagamento(Reserva res, bool inicial)
     {
         decimal valorMinimo = res.ValorTotalCalculado * 0.5m;
-        decimal valorPendente = res.ValorTotalCalculado - res.GetValorPagoTotal();
+        decimal valorPendente = res.ValorTotalCalculado - res.ValorPagoTotal();
 
         tela.EscreverNaAcao(10, $"Valor Total: R$ {res.ValorTotalCalculado:F2}");
         tela.EscreverNaAcao(11, $"Valor Pendente: R$ {valorPendente:F2}");
@@ -318,8 +338,7 @@ public class ReservaCRUD
         
         if (valorPago <= 0)
         {
-            tela.MostrarMensagemRodape("Valor inválido. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Valor inválido. Pressione Enter.");
             return;
         }
 
@@ -335,7 +354,7 @@ public class ReservaCRUD
         res.AtualizarStatusReserva();
     }
     
-    public List<Reserva> GetReservas()
+    public List<Reserva> Reservas()
     {
         return this.reservas;
     }

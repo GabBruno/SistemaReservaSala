@@ -12,8 +12,9 @@ public class RecursoCRUD
         this.recursos = new List<Recurso>();
         this.recurso = new Recurso();
         this.posicao = -1;
-        
+
         recursos.Add(new Recurso { id = proximoID++, nome = "Coffee Break", CustoPorUnidade = 15.00m, QuantidadeEmEstoque = 100 });
+        recursos.Add(new Recurso { id = proximoID++, nome = "Wi-Fi", CustoPorUnidade = 35.00m, QuantidadeEmEstoque = 10 });
         recursos.Add(new Recurso { id = proximoID++, nome = "Projetor", CustoPorUnidade = 50.00m, QuantidadeEmEstoque = 5 });
     }
     
@@ -28,20 +29,20 @@ public class RecursoCRUD
         
         while (true)
         {
+            tela.PrepararTelaPrincipal("Gestão de Aluguéis de Salas de Reunião - Gestão de Recursos");
+            
             tela.LimparJanelaAcao();
             
-            opcao = tela.DesenharMenu("GESTÃO DE ESTOQUE", opcoes);
+            tela.LimparJanelaMenu();
+            opcao = tela.DesenharMenu("GESTÃO DE RECURSOS", opcoes);
 
             switch (opcao)
             {
                 case "1": CadastrarRecurso(); break;
                 case "2": EditarRecurso(); break;
-                case "3": ListarRecursos(); break;
-                case "0": tela.LimparJanelaMenu(); return; 
-                default:
-                    tela.MostrarMensagemRodape("Opção inválida. Pressione Enter.");
-                    Console.ReadKey();
-                    break;
+                case "3": ListarRecursos(); break; 
+                case "0": return; 
+                default: tela.Pausa("Opção inválida. Pressione Enter."); break;
             }
         }
     }
@@ -52,31 +53,26 @@ public class RecursoCRUD
         this.recurso = new Recurso();
 
         recurso.nome = tela.PerguntarNaAcao(3, "Nome do Recurso: ");
-        
         decimal.TryParse(tela.PerguntarNaAcao(4, "Custo por Unidade (R$): "), out decimal custo);
         recurso.CustoPorUnidade = custo;
-
         int.TryParse(tela.PerguntarNaAcao(5, "Quantidade em Estoque: "), out int qtd);
         recurso.QuantidadeEmEstoque = qtd;
 
         if (string.IsNullOrWhiteSpace(recurso.nome) || recurso.CustoPorUnidade < 0 || recurso.QuantidadeEmEstoque < 0)
         {
-            tela.MostrarMensagemRodape("Erro: Nome, Custo (>=0) e Quantidade (>=0) são obrigatórios. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Nome, Custo (>=0) e Quantidade (>=0) são obrigatórios. Pressione Enter.");
             return;
         }
 
         if (ProcurarPorNome(recurso.nome) != null)
         {
-            tela.MostrarMensagemRodape("Erro: Já existe um recurso com este nome. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Erro: Já existe um recurso com este nome. Pressione Enter.");
             return;
         }
 
         recurso.id = this.proximoID++;
         this.recursos.Add(recurso);
-        tela.MostrarMensagemRodape("Recurso cadastrado com sucesso! Pressione Enter.");
-        Console.ReadKey();
+        tela.Pausa("Recurso cadastrado com sucesso! Pressione Enter.");
     }
 
     private void EditarRecurso()
@@ -86,15 +82,12 @@ public class RecursoCRUD
         Recurso recursoEditar = ProcurarPorNome(nomeBusca);
         if (recursoEditar == null)
         {
-            tela.MostrarMensagemRodape("Recurso não encontrado. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Recurso não encontrado. Pressione Enter.");
             return;
         }
         
         this.posicao = recursos.IndexOf(recursoEditar);
-
         tela.DesenharJanelaAcao("EDITAR RECURSO");
-        
         int linDiv = 6; 
         tela.DesenharDivisoriaAcao(linDiv, " DADOS ATUAIS ");
         tela.EscreverNaAcao(linDiv + 2, $"Recurso: {recursoEditar.nome}");
@@ -108,57 +101,53 @@ public class RecursoCRUD
         if (int.TryParse(qtdStr, out int qtd) && qtd >= 0) recursoEditar.QuantidadeEmEstoque = qtd;
 
         this.recursos[this.posicao] = recursoEditar;
-        tela.MostrarMensagemRodape("Recurso atualizado com sucesso! Pressione Enter.");
-        Console.ReadKey();
+        tela.Pausa("Recurso atualizado com sucesso! Pressione Enter.");
     }
 
     private void ListarRecursos()
     {
-        tela.DesenharJanelaAcao("LISTAGEM DE RECURSOS (ESTOQUE)");
+        tela.PrepararTelaPrincipal("LISTAGEM DE RECURSOS");
 
         if (recursos.Count == 0)
         {
-            tela.MostrarMensagemRodape("Nenhum recurso cadastrado. Pressione Enter.");
-            Console.ReadKey();
+            tela.Pausa("Nenhum recurso cadastrado. Pressione Enter.");
             return;
         }
 
-        int linhaAtual = 3;
+        int linhaAtual = 4;
         
         int colId = 2;
         int colNome = 7;
         int colCusto = 30;
         int colQtd = 48;
         
-        tela.EscreverNaAcao(linhaAtual, colId, "ID");
-        tela.EscreverNaAcao(linhaAtual, colNome, "Nome");
-        tela.EscreverNaAcao(linhaAtual, colCusto, "Custo Unit.");
-        tela.EscreverNaAcao(linhaAtual, colQtd, "Qtd. Estoque");
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write("ID");
+        Console.SetCursorPosition(colNome, linhaAtual); Console.Write("Nome");
+        Console.SetCursorPosition(colCusto, linhaAtual); Console.Write("Custo Unit.");
+        Console.SetCursorPosition(colQtd, linhaAtual); Console.Write("Qtd. Estoque");
         linhaAtual++;
-        tela.EscreverNaAcao(linhaAtual++, new string('-', 66));
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 100));
+        linhaAtual++;
         
         foreach (var r in recursos)
         {
-            if (linhaAtual >= 24)
+            if (linhaAtual >= 25)
             {
-                tela.MostrarMensagemRodape("Muitos recursos para exibir. Pressione Enter...");
-                Console.ReadKey();
-                tela.LimparJanelaAcao();
-                tela.DesenharJanelaAcao("LISTAGEM DE RECURSOS (ESTOQUE)");
-                linhaAtual = 3;
+                tela.Pausa("Muitos recursos para exibir. Pressione Enter...");
+                tela.PrepararTelaPrincipal("LISTAGEM DE RECURSOS");
+                linhaAtual = 5;
             }
             
-            tela.EscreverNaAcao(linhaAtual, colId, r.id.ToString());
-            tela.EscreverNaAcao(linhaAtual, colNome, r.nome);
-            tela.EscreverNaAcao(linhaAtual, colCusto, $"R$ {r.CustoPorUnidade:F2}");
-            tela.EscreverNaAcao(linhaAtual, colQtd, r.QuantidadeEmEstoque.ToString());
+            Console.SetCursorPosition(colId, linhaAtual); Console.Write(r.id.ToString());
+            Console.SetCursorPosition(colNome, linhaAtual); Console.Write(r.nome);
+            Console.SetCursorPosition(colCusto, linhaAtual); Console.Write($"R$ {r.CustoPorUnidade:F2}");
+            Console.SetCursorPosition(colQtd, linhaAtual); Console.Write(r.QuantidadeEmEstoque.ToString());
             linhaAtual++;
         }
 
-        tela.MostrarMensagemRodape("Pressione Enter para voltar ao menu de recursos...");
-        Console.ReadKey();
+        tela.Pausa("Pressione Enter para voltar ao menu de recursos...");
     }
-
+    
     public Recurso ProcurarPorNome(string nome)
     {
         if (string.IsNullOrWhiteSpace(nome)) return null;
