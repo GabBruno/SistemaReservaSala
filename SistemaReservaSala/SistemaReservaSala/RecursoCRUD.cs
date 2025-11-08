@@ -21,19 +21,20 @@ public class RecursoCRUD
     public void ExecutarCRUD()
     {
         string opcao;
+        
         List<string> opcoes = new List<string>(); 
         opcoes.Add("[1] Cadastrar Recurso   ");
         opcoes.Add("[2] Editar Estoque/Preço");
         opcoes.Add("[3] Listar Recursos     ");
+        opcoes.Add("[4] Excluir Recurso     "); 
         opcoes.Add("[0] Voltar              ");
         
         while (true)
         {
             tela.PrepararTelaPrincipal("Gestão de Aluguéis de Salas de Reunião - Gestão de Recursos");
-            
             tela.LimparJanelaAcao();
-            
             tela.LimparJanelaMenu();
+            
             opcao = tela.DesenharMenu("GESTÃO DE RECURSOS", opcoes);
 
             switch (opcao)
@@ -41,6 +42,7 @@ public class RecursoCRUD
                 case "1": CadastrarRecurso(); break;
                 case "2": EditarRecurso(); break;
                 case "3": ListarRecursos(); break; 
+                case "4": ExcluirRecurso(); break; 
                 case "0": return; 
                 default: tela.Pausa("Opção inválida. Pressione Enter."); break;
             }
@@ -163,11 +165,44 @@ public class RecursoCRUD
 
         tela.Pausa("Pressione Enter para voltar ao menu de recursos...");
     }
-    
+
+    private void ExcluirRecurso()
+    {
+        string nomeBusca = tela.PerguntarRodape("Digite o Nome do recurso para EXCLUIR: ");
+
+        Recurso recursoParaExcluir = ProcurarPorNome(nomeBusca);
+        if (recursoParaExcluir == null)
+        {
+            tela.Pausa("Recurso não encontrado. Pressione Enter.");
+            return;
+        }
+
+        tela.DesenharJanelaAcao("EXCLUIR RECURSO");
+        tela.EscreverNaAcao(3, $"ID: {recursoParaExcluir.id}");
+        tela.EscreverNaAcao(4, $"Nome: {recursoParaExcluir.nome}");
+        tela.EscreverNaAcao(5, $"Estoque: {recursoParaExcluir.QuantidadeEmEstoque}");
+
+        string resp = tela.PerguntarRodape($"Tem certeza que deseja EXCLUIR {recursoParaExcluir.nome}? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            this.recursos.RemoveAt(this.posicao);
+            tela.Pausa("Recurso excluído com sucesso. Pressione Enter.");
+        }
+        else
+        {
+            tela.Pausa("Exclusão cancelada. Pressione Enter.");
+        }
+    }
+
     public Recurso ProcurarPorNome(string nome)
     {
         if (string.IsNullOrWhiteSpace(nome)) return null;
-        return recursos.Find(r => r.nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
+        Recurso encontrado = recursos.Find(r => r.nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
+        if (encontrado != null)
+        {
+            this.posicao = recursos.IndexOf(encontrado);
+        }
+        return encontrado;
     }
 
     public bool VerificarDisponibilidade(Recurso recurso, int qtdSolicitada)

@@ -17,14 +17,17 @@ public class SalaCRUD
         this.salas.Add(new Sala(proximoID++, "Delta", 10, 50.00m, new List<string>{"Wi-Fi", "Quadro Branco"}));
         this.salas.Add(new Sala(proximoID++, "Alpha", 8, 150.00m, new List<string>{"Wi-Fi Premium", "Projetor", "Café"}));
     }
+    
     public void ExecutarCRUD()
     {
         string opcao;
+        
         List<string> opcoes = new List<string>(); 
         opcoes.Add("[1] Cadastrar Sala");
         opcoes.Add("[2] Editar Sala   ");
         opcoes.Add("[3] Consultar Sala");
         opcoes.Add("[4] Listar Salas  ");
+        opcoes.Add("[5] Excluir Sala  "); 
         opcoes.Add("[0] Voltar        ");
         
         while(true)
@@ -42,12 +45,13 @@ public class SalaCRUD
                 case "2": EditarSala(); break;
                 case "3": ConsultarSala(); break;
                 case "4": ListarSalas(); break; 
+                case "5": ExcluirSala(); break;
                 case "0": return; 
                 default: tela.Pausa("Opção inválida. Pressione Enter."); break;
             }
         }
     }
-
+    
     private void CadastrarSala()
     {
         if (this.salas.Count >= LIMITE_SALAS)
@@ -115,7 +119,7 @@ public class SalaCRUD
         string nome = tela.PerguntarNaAcao(3, $"Novo Nome [{salaParaEditar.nome}]: ");
         string capStr = tela.PerguntarNaAcao(4, $"Nova Capacidade [{salaParaEditar.capacidade}]: ");
         string valStr = tela.PerguntarNaAcao(5, $"Novo Valor/Hora [{salaParaEditar.valorHora:F2}]: ");
-
+        
         if (!string.IsNullOrWhiteSpace(nome))
         {
              Sala nomeDuplicado = salas.Find(s => s.nome.Equals(nome, StringComparison.OrdinalIgnoreCase) && s.id != salaParaEditar.id);
@@ -129,9 +133,10 @@ public class SalaCRUD
         string resp = tela.PerguntarRodape("Confirma as alterações na sala? (S/N): ");
         if (resp.ToUpper() == "S")
         {
-            salaParaEditar.nome = nome;
+            if (!string.IsNullOrWhiteSpace(nome)) salaParaEditar.nome = nome;
             if (int.TryParse(capStr, out int cap) && cap > 0) salaParaEditar.capacidade = cap;
             if (decimal.TryParse(valStr, out decimal val) && val > 0) salaParaEditar.valorHora = val;
+            
             this.salas[this.posicao] = salaParaEditar;
             tela.Pausa("Sala atualizada com sucesso! Pressione Enter.");
         }
@@ -161,6 +166,7 @@ public class SalaCRUD
         
         tela.Pausa("Pressione Enter para voltar ao menu de salas...");
     }
+    
     private void ListarSalas()
     {
         tela.PrepararTelaPrincipal("LISTAGEM DE SALAS");
@@ -207,7 +213,33 @@ public class SalaCRUD
 
         tela.Pausa("Pressione Enter para voltar ao menu de salas...");
     }
+    private void ExcluirSala()
+    {
+        string nomeBusca = tela.PerguntarRodape("Digite o Nome da sala para EXCLUIR: ");
 
+        Sala salaParaExcluir = ProcurarPorNome(nomeBusca);
+        if (salaParaExcluir == null)
+        {
+            tela.Pausa("Sala não encontrada. Pressione Enter.");
+            return;
+        }
+
+        tela.DesenharJanelaAcao("EXCLUIR SALA");
+        tela.EscreverNaAcao(3, $"ID: {salaParaExcluir.id}");
+        tela.EscreverNaAcao(4, $"Nome: {salaParaExcluir.nome}");
+        tela.EscreverNaAcao(5, $"Capacidade: {salaParaExcluir.capacidade}");
+
+        string resp = tela.PerguntarRodape($"Tem certeza que deseja EXCLUIR a {salaParaExcluir.nome}? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            this.salas.RemoveAt(this.posicao);
+            tela.Pausa("Sala excluída com sucesso. Pressione Enter.");
+        }
+        else
+        {
+            tela.Pausa("Exclusão cancelada. Pressione Enter.");
+        }
+    }
     public Sala ProcurarPorNome(string nome)
     {
         if (string.IsNullOrWhiteSpace(nome)) return null;

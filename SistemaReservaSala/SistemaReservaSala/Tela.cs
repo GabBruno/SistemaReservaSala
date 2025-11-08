@@ -22,8 +22,6 @@ public class Tela
 
     public void PrepararTelaPrincipal(string titulo)
     {
-        Console.BackgroundColor = ConsoleColor.Blue;
-        Console.ForegroundColor = ConsoleColor.White;
         Console.Clear();
         
         MontarMoldura(0, 0, larguraTotal, alturaTotal);
@@ -185,7 +183,7 @@ public class Tela
         Console.SetCursorPosition(ci, li); Console.Write("╠");
         for (int c = ci + 1; c < cf; c++)
         {
-            Console.Write("─");
+            Console.Write("═");
         }
         Console.SetCursorPosition(cf, li); Console.Write("╣");
         
