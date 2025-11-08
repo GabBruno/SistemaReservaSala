@@ -282,19 +282,19 @@ public class ReservaCRUD
         int colCli = 6;
         int colSala = 22;
         int colIni = 34;
-        int colFim = 51;       
-        int colStatus = 69;
-        int colPago = 84;
+        int colFim = 54;       
+        int colStatus = 72;
+        int colPago = 87;
 
         Console.SetCursorPosition(colId, linhaAtual); Console.Write("ID");
         Console.SetCursorPosition(colCli, linhaAtual); Console.Write("Cliente");
         Console.SetCursorPosition(colSala, linhaAtual); Console.Write("Sala");
-        Console.SetCursorPosition(colIni, linhaAtual); Console.Write("Início (dd/MM HH:mm)");
-        Console.SetCursorPosition(colFim, linhaAtual); Console.Write("Fim (dd/MM HH:mm)");  
+        Console.SetCursorPosition(colIni, linhaAtual); Console.Write("Início");
+        Console.SetCursorPosition(colFim, linhaAtual); Console.Write("Fim");  
         Console.SetCursorPosition(colStatus, linhaAtual); Console.Write("Status");
         Console.SetCursorPosition(colPago, linhaAtual); Console.Write("Valor Pago");
         linhaAtual++;
-        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 96)); 
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 99)); 
         linhaAtual++;
         
         foreach (var r in reservasAtivas.OrderBy(r => r.DataHoraInicio))
