@@ -78,9 +78,17 @@ public class ClienteCRUD
             return;
         }
 
-        cliente.id = this.proximoID++;
-        this.clientes.Add(cliente);
-        tela.Pausa("Cliente cadastrado com sucesso! Pressione Enter.");
+        string resp = tela.PerguntarRodape("Confirma o cadastro deste cliente? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            cliente.id = this.proximoID++;
+            this.clientes.Add(cliente);
+            tela.Pausa("Cliente cadastrado com sucesso! Pressione Enter.");
+        }
+        else
+        {
+            tela.Pausa("Cadastro cancelado. Pressione Enter.");
+        }
     }
 
     private void EditarCliente()
@@ -117,15 +125,23 @@ public class ClienteCRUD
                  tela.Pausa("Erro: Este Email já pertence a outro cliente. Pressione Enter.");
                  return;
             }
-            clienteParaEditar.email = email;
         }
 
-        if (!string.IsNullOrWhiteSpace(nome)) clienteParaEditar.nome = nome;
-        if (!string.IsNullOrWhiteSpace(tel)) clienteParaEditar.telefone = tel;
 
-        this.clientes[this.posicao] = clienteParaEditar;
-        
-        tela.Pausa("Cliente atualizado com sucesso! Pressione Enter.");
+        string resp = tela.PerguntarRodape("Confirma as alterações? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            if (!string.IsNullOrWhiteSpace(nome)) clienteParaEditar.nome = nome;
+            clienteParaEditar.email = email;
+            if (!string.IsNullOrWhiteSpace(tel)) clienteParaEditar.telefone = tel;
+
+            this.clientes[this.posicao] = clienteParaEditar;
+            tela.Pausa("Cliente atualizado com sucesso! Pressione Enter.");
+        }
+        else
+        {
+            tela.Pausa("Alteração cancelada. Pressione Enter.");
+        }
     }
     private void ConsultarCliente()
     {

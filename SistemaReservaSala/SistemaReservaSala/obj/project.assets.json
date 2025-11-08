@@ -8,19 +8,19 @@
     "net9.0": []
   },
   "packageFolders": {
-    "C:\\Users\\Gabri\\.nuget\\packages\\": {}
+    "C:\\Users\\gabri\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Gabri\\OneDrive - Católica SC\\Trabalho N2\\SistemaReservaSala\\SistemaReservaSalaReuniao\\SistemaReservaSala\\SistemaReservaSala\\SistemaReservaSala.csproj",
+      "projectUniqueName": "C:\\Users\\gabri\\OneDrive\\Documentos\\GitHub\\SistemaReservaSala\\SistemaReservaSala\\SistemaReservaSala\\SistemaReservaSala.csproj",
       "projectName": "SistemaReservaSala",
-      "projectPath": "C:\\Users\\Gabri\\OneDrive - Católica SC\\Trabalho N2\\SistemaReservaSala\\SistemaReservaSalaReuniao\\SistemaReservaSala\\SistemaReservaSala\\SistemaReservaSala.csproj",
-      "packagesPath": "C:\\Users\\Gabri\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Gabri\\OneDrive - Católica SC\\Trabalho N2\\SistemaReservaSala\\SistemaReservaSalaReuniao\\SistemaReservaSala\\SistemaReservaSala\\obj\\",
+      "projectPath": "C:\\Users\\gabri\\OneDrive\\Documentos\\GitHub\\SistemaReservaSala\\SistemaReservaSala\\SistemaReservaSala\\SistemaReservaSala.csproj",
+      "packagesPath": "C:\\Users\\gabri\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\gabri\\OneDrive\\Documentos\\GitHub\\SistemaReservaSala\\SistemaReservaSala\\SistemaReservaSala\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Gabri\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\gabri\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -65,7 +65,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.303/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

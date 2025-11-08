@@ -79,9 +79,17 @@ public class SalaCRUD
             return;
         }
 
-        sala.id = this.proximoID++;
-        this.salas.Add(sala);
-        tela.Pausa("Sala cadastrada com sucesso! Pressione Enter.");
+        string resp = tela.PerguntarRodape("Confirma o cadastro desta sala? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            sala.id = this.proximoID++;
+            this.salas.Add(sala);
+            tela.Pausa("Sala cadastrada com sucesso! Pressione Enter.");
+        }
+        else
+        {
+             tela.Pausa("Cadastro cancelado. Pressione Enter.");
+        }
     }
 
     private void EditarSala()
@@ -115,15 +123,22 @@ public class SalaCRUD
              {
                  tela.Pausa("Erro: Este Nome de Sala já está cadastrado. Tente outro nome. Pressione Enter.");
                  return;
-             }
-             salaParaEditar.nome = nome;
+             }             
         }
 
-        if (int.TryParse(capStr, out int cap) && cap > 0) salaParaEditar.capacidade = cap;
-        if (decimal.TryParse(valStr, out decimal val) && val > 0) salaParaEditar.valorHora = val;
-
-        this.salas[this.posicao] = salaParaEditar;
-        tela.Pausa("Sala atualizada com sucesso! Pressione Enter.");
+        string resp = tela.PerguntarRodape("Confirma as alterações na sala? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            salaParaEditar.nome = nome;
+            if (int.TryParse(capStr, out int cap) && cap > 0) salaParaEditar.capacidade = cap;
+            if (decimal.TryParse(valStr, out decimal val) && val > 0) salaParaEditar.valorHora = val;
+            this.salas[this.posicao] = salaParaEditar;
+            tela.Pausa("Sala atualizada com sucesso! Pressione Enter.");
+        }
+        else
+        {
+            tela.Pausa("Alteração cancelada. Pressione Enter.");
+        }
     }
 
     private void ConsultarSala()

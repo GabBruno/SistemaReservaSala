@@ -70,9 +70,17 @@ public class RecursoCRUD
             return;
         }
 
-        recurso.id = this.proximoID++;
-        this.recursos.Add(recurso);
-        tela.Pausa("Recurso cadastrado com sucesso! Pressione Enter.");
+        string resp = tela.PerguntarRodape("Confirma o cadastro do recurso? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            recurso.id = this.proximoID++;
+            this.recursos.Add(recurso);
+            tela.Pausa("Recurso cadastrado com sucesso! Pressione Enter.");
+        }
+        else
+        {
+             tela.Pausa("Cadastro cancelado. Pressione Enter.");
+        }
     }
 
     private void EditarRecurso()
@@ -97,11 +105,19 @@ public class RecursoCRUD
         string custoStr = tela.PerguntarNaAcao(3, $"Novo Custo (R$) [{recursoEditar.CustoPorUnidade:F2}]: ");
         string qtdStr = tela.PerguntarNaAcao(4, $"Nova Qtd. Estoque [{recursoEditar.QuantidadeEmEstoque}]: ");
 
-        if (decimal.TryParse(custoStr, out decimal custo) && custo >= 0) recursoEditar.CustoPorUnidade = custo;
-        if (int.TryParse(qtdStr, out int qtd) && qtd >= 0) recursoEditar.QuantidadeEmEstoque = qtd;
-
-        this.recursos[this.posicao] = recursoEditar;
-        tela.Pausa("Recurso atualizado com sucesso! Pressione Enter.");
+        string resp = tela.PerguntarRodape("Confirma as alterações no recurso? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            if (decimal.TryParse(custoStr, out decimal custo) && custo >= 0) recursoEditar.CustoPorUnidade = custo;
+            if (int.TryParse(qtdStr, out int qtd) && qtd >= 0) recursoEditar.QuantidadeEmEstoque = qtd;
+            
+            this.recursos[this.posicao] = recursoEditar;
+            tela.Pausa("Recurso atualizado com sucesso! Pressione Enter.");
+        }
+        else
+        {
+            tela.Pausa("Alteração cancelada. Pressione Enter.");
+        }
     }
 
     private void ListarRecursos()

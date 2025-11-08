@@ -13,3 +13,18 @@ C:\Users\Gabri\OneDrive - Católica SC\Trabalho N2\SistemaReservaSala\SistemaRes
 C:\Users\Gabri\OneDrive - Católica SC\Trabalho N2\SistemaReservaSala\SistemaReservaSalaReuniao\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.pdb
 C:\Users\Gabri\OneDrive - Católica SC\Trabalho N2\SistemaReservaSala\SistemaReservaSalaReuniao\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.genruntimeconfig.cache
 C:\Users\Gabri\OneDrive - Católica SC\Trabalho N2\SistemaReservaSala\SistemaReservaSalaReuniao\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\ref\SistemaReservaSala.dll
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\bin\Debug\net9.0\SistemaReservaSala.exe
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\bin\Debug\net9.0\SistemaReservaSala.deps.json
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\bin\Debug\net9.0\SistemaReservaSala.runtimeconfig.json
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\bin\Debug\net9.0\SistemaReservaSala.dll
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\bin\Debug\net9.0\SistemaReservaSala.pdb
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.AssemblyInfoInputs.cache
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.AssemblyInfo.cs
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.csproj.CoreCompileInputs.cache
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.sourcelink.json
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.dll
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\refint\SistemaReservaSala.dll
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.pdb
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\SistemaReservaSala.genruntimeconfig.cache
+C:\Users\gabri\OneDrive\Documentos\GitHub\SistemaReservaSala\SistemaReservaSala\SistemaReservaSala\obj\Debug\net9.0\ref\SistemaReservaSala.dll
