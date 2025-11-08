@@ -94,18 +94,18 @@ public class ClienteCRUD
     private void EditarCliente()
     {
         string doc = tela.PerguntarRodape("Digite o CPF do cliente para editar: ");
-        
+
         Cliente clienteParaEditar = ProcurarPorDocumento(doc);
-        
+
         if (clienteParaEditar == null)
         {
             tela.Pausa("Cliente não encontrado. Pressione Enter.");
             return;
         }
-        
+
         this.posicao = clientes.IndexOf(clienteParaEditar);
         tela.DesenharJanelaAcao("EDITAR CLIENTE");
-        int linDiv = 7; 
+        int linDiv = 8; 
         tela.DesenharDivisoriaAcao(linDiv, " DADOS ATUAIS ");
 
         tela.EscreverNaAcao(linDiv + 2, $"Nome: {clienteParaEditar.nome}");
@@ -114,25 +114,36 @@ public class ClienteCRUD
         tela.EscreverNaAcao(linDiv + 5, $"Telefone: {clienteParaEditar.telefone}");
 
         string nome = tela.PerguntarNaAcao(3, "Novo Nome: ");
-        string email = tela.PerguntarNaAcao(4, "Novo E-mail: ");
-        string tel = tela.PerguntarNaAcao(5, "Novo Telefone: ");
+        string novoCpf = tela.PerguntarNaAcao(4, "Novo CPF: ");
+        string email = tela.PerguntarNaAcao(5, "Novo E-mail: ");
+        string tel = tela.PerguntarNaAcao(6, "Novo Telefone: ");
+
+        if (!string.IsNullOrWhiteSpace(novoCpf))
+        {
+            Cliente cpfDuplicado = ProcurarPorDocumento(novoCpf);
+            if (cpfDuplicado != null && cpfDuplicado.id != clienteParaEditar.id)
+            {
+                tela.Pausa("Erro: Este CPF já pertence a outro cliente. Pressione Enter.");
+                return;
+            }
+        }
 
         if (!string.IsNullOrWhiteSpace(email))
         {
             Cliente emailDuplicado = ProcurarPorEmail(email);
             if (emailDuplicado != null && emailDuplicado.id != clienteParaEditar.id)
             {
-                 tela.Pausa("Erro: Este Email já pertence a outro cliente. Pressione Enter.");
-                 return;
+                tela.Pausa("Erro: Este Email já pertence a outro cliente. Pressione Enter.");
+                return;
             }
         }
-
 
         string resp = tela.PerguntarRodape("Confirma as alterações? (S/N): ");
         if (resp.ToUpper() == "S")
         {
             if (!string.IsNullOrWhiteSpace(nome)) clienteParaEditar.nome = nome;
-            clienteParaEditar.email = email;
+            if (!string.IsNullOrWhiteSpace(novoCpf)) clienteParaEditar.cpf = novoCpf;
+            if (!string.IsNullOrWhiteSpace(email)) clienteParaEditar.email = email;
             if (!string.IsNullOrWhiteSpace(tel)) clienteParaEditar.telefone = tel;
 
             this.clientes[this.posicao] = clienteParaEditar;
@@ -143,6 +154,7 @@ public class ClienteCRUD
             tela.Pausa("Alteração cancelada. Pressione Enter.");
         }
     }
+    
     private void ConsultarCliente()
     {
         string doc = tela.PerguntarRodape("Digite o CPF do cliente para consultar: ");

@@ -112,9 +112,9 @@ public class SalaCRUD
         tela.EscreverNaAcao(linDiv + 3, $"Capacidade: {salaParaEditar.capacidade}");
         tela.EscreverNaAcao(linDiv + 4, $"Valor/Hora: R$ {salaParaEditar.valorHora:F2}");
 
-        string nome = tela.PerguntarNaAcao(3, $"Novo Nome [{salaParaEditar.nome}]: ");
-        string capStr = tela.PerguntarNaAcao(4, $"Nova Capacidade [{salaParaEditar.capacidade}]: ");
-        string valStr = tela.PerguntarNaAcao(5, $"Novo Valor/Hora [{salaParaEditar.valorHora:F2}]: ");
+        string nome = tela.PerguntarNaAcao(3, $"Novo Nome: ");
+        string capStr = tela.PerguntarNaAcao(4, $"Nova Capacidade: ");
+        string valStr = tela.PerguntarNaAcao(5, $"Novo Valor/Hora: ");
 
         if (!string.IsNullOrWhiteSpace(nome))
         {
