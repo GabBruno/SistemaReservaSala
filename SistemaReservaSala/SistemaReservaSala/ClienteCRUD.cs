@@ -20,20 +20,21 @@ public class ClienteCRUD
     public void ExecutarCRUD()
     {
         string opcao;
+        
         List<string> opcoes = new List<string>(); 
         opcoes.Add("[1] Cadastrar Cliente");
         opcoes.Add("[2] Editar Cliente   ");
         opcoes.Add("[3] Consultar Cliente");
         opcoes.Add("[4] Listar Clientes  ");
+        opcoes.Add("[5] Excluir Cliente  "); 
         opcoes.Add("[0] Voltar           ");
-        
+
         while(true)
         {
             tela.PrepararTelaPrincipal("Gestão de Aluguéis de Salas de Reunião - Gestão de Clientes");
-
             tela.LimparJanelaAcao();
-            
             tela.LimparJanelaMenu();
+            
             opcao = tela.DesenharMenu("GESTÃO DE CLIENTES", opcoes);
 
             switch (opcao)
@@ -42,12 +43,13 @@ public class ClienteCRUD
                 case "2": EditarCliente(); break;
                 case "3": ConsultarCliente(); break;
                 case "4": ListarClientes(); break;
+                case "5": ExcluirCliente(); break; 
                 case "0": return; 
                 default:tela.Pausa("Opção inválida. Pressione Enter."); break;
             }
         }
     }
-
+    
     private void CadastrarCliente()
     {
         tela.DesenharJanelaAcao("CADASTRAR CLIENTE");
@@ -78,7 +80,7 @@ public class ClienteCRUD
             return;
         }
 
-        string resp = tela.PerguntarRodape("Confirma o cadastro deste cliente? (S/N): ");
+        string resp = tela.PerguntarRodape("Confirma o cadastro do cliente? (S/N): ");
         if (resp.ToUpper() == "S")
         {
             cliente.id = this.proximoID++;
@@ -138,7 +140,7 @@ public class ClienteCRUD
             }
         }
 
-        string resp = tela.PerguntarRodape("Confirma as alterações? (S/N): ");
+        string resp = tela.PerguntarRodape("Confirma as alterações no cliente? (S/N): ");
         if (resp.ToUpper() == "S")
         {
             if (!string.IsNullOrWhiteSpace(nome)) clienteParaEditar.nome = nome;
@@ -221,6 +223,36 @@ public class ClienteCRUD
         }
 
         tela.Pausa("Pressione Enter para voltar ao menu de clientes...");
+    }
+
+    private void ExcluirCliente()
+    {
+        string doc = tela.PerguntarRodape("Digite o CPF do cliente para EXCLUIR: ");
+
+        Cliente clienteParaExcluir = ProcurarPorDocumento(doc);
+        if (clienteParaExcluir == null)
+        {
+            tela.Pausa("Cliente não encontrado. Pressione Enter.");
+            return;
+        }
+        
+        tela.DesenharJanelaAcao("EXCLUIR CLIENTE");
+        tela.EscreverNaAcao(2, $"ID: {clienteParaExcluir.id}");
+        tela.EscreverNaAcao(3, $"Nome: {clienteParaExcluir.nome}");
+        tela.EscreverNaAcao(4, $"CPF: {clienteParaExcluir.cpf}");
+        tela.EscreverNaAcao(5, $"E-mail: {clienteParaExcluir.email}");
+        tela.EscreverNaAcao(6, $"Telefone: {clienteParaExcluir.telefone}");
+        
+        string resp = tela.PerguntarRodape($"Tem certeza que deseja EXCLUIR {clienteParaExcluir.nome}? (S/N): ");
+        if (resp.ToUpper() == "S")
+        {
+            this.clientes.RemoveAt(this.posicao);
+            tela.Pausa("Cliente excluído com sucesso. Pressione Enter.");
+        }
+        else
+        {
+            tela.Pausa("Exclusão cancelada. Pressione Enter.");
+        }
     }
     
     public Cliente ProcurarPorDocumento(string cpf)

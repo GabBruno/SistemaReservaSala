@@ -1,5 +1,4 @@
 using System.Globalization;
-
 public class ReservaCRUD
 {
     private Tela tela;
@@ -140,7 +139,7 @@ public class ReservaCRUD
 
         if (!VerificarDisponibilidadeSala(sala, reserva.DataHoraInicio, reserva.DataHoraFim))
         {
-            tela.Pausa("Erro: Sala ocupada neste período (Overbooking). Pressione Enter.");
+            tela.Pausa("Erro: Sala ocupada neste período. Pressione Enter.");
             return;
         }
         
@@ -281,12 +280,13 @@ public class ReservaCRUD
         int linhaAtual = 4;
         
         int colId = 2;
-        int colCli = 6;
-        int colSala = 22;
-        int colIni = 34;
-        int colFim = 54;       
-        int colStatus = 72;
-        int colPago = 87;
+        int colCli = 7;
+        int colSala = 23;
+        int colIni = 33;
+        int colFim = 48;       
+        int colStatus = 64;
+        int colPago = 78;
+        int colTotal = 91;
 
         Console.SetCursorPosition(colId, linhaAtual); Console.Write("ID");
         Console.SetCursorPosition(colCli, linhaAtual); Console.Write("Cliente");
@@ -294,9 +294,10 @@ public class ReservaCRUD
         Console.SetCursorPosition(colIni, linhaAtual); Console.Write("Início");
         Console.SetCursorPosition(colFim, linhaAtual); Console.Write("Fim");  
         Console.SetCursorPosition(colStatus, linhaAtual); Console.Write("Status");
-        Console.SetCursorPosition(colPago, linhaAtual); Console.Write("Valor Pago");
+        Console.SetCursorPosition(colPago, linhaAtual); Console.Write("Val. Pago");
+        Console.SetCursorPosition(colTotal, linhaAtual); Console.Write("Val. Total");
         linhaAtual++;
-        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 99)); 
+        Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 100)); 
         linhaAtual++;
         
         foreach (var r in reservasAtivas.OrderBy(r => r.DataHoraInicio))
@@ -315,6 +316,8 @@ public class ReservaCRUD
             Console.SetCursorPosition(colFim, linhaAtual); Console.Write(r.DataHoraFim.ToString("dd/MM HH:mm"));
             Console.SetCursorPosition(colStatus, linhaAtual); Console.Write(r.StatusReserva);
             Console.SetCursorPosition(colPago, linhaAtual); Console.Write($"R$ {r.ValorPagoTotal():F2}");
+            Console.SetCursorPosition(colTotal, linhaAtual); Console.Write($"R$ {r.ValorTotalCalculado:F2}"); 
+            
             linhaAtual++;
         }
 
@@ -335,8 +338,6 @@ public class ReservaCRUD
         
         tela.DesenharJanelaAcao("REGISTRAR PAGAMENTO");
         RegistrarPagamento(res, false);
-        
-        tela.Pausa($"Pagamento registrado. Novo status: {res.StatusReserva}. Pressione Enter.");
     }
 
     private bool VerificarDisponibilidadeSala(Sala sala, DateTime inicio, DateTime fim)
@@ -358,6 +359,12 @@ public class ReservaCRUD
     {
         decimal valorMinimo = res.ValorTotalCalculado * 0.5m;
         decimal valorPendente = res.ValorTotalCalculado - res.ValorPagoTotal();
+
+        if (valorPendente <= 0 && !inicial)
+        {
+            tela.Pausa("Esta reserva já está totalmente paga. Pressione Enter.");
+            return;
+        }
 
         tela.EscreverNaAcao(linhaInicial, $"Valor Total: R$ {res.ValorTotalCalculado:F2}");
         tela.EscreverNaAcao(linhaInicial + 1, $"Valor Pendente: R$ {valorPendente:F2}");
@@ -384,15 +391,32 @@ public class ReservaCRUD
         string resp = tela.PerguntarRodape($"Confirma pagamento de R$ {valorPago:F2}? (S/N): ");
         if (resp.ToUpper() == "S")
         {
+            decimal troco = 0;
+            decimal valorARegistrar = valorPago;
+            
+            if (valorPago > valorPendente)
+            {
+                troco = valorPago - valorPendente;
+                valorARegistrar = valorPendente; 
+            }
+
             Pagamento p = new Pagamento();
             p.id = res.PagamentosRegistrados.Count + 1;
-            p.Valor = valorPago;
+            p.Valor = valorARegistrar; 
             p.Metodo = metodo;
             p.DataPagamento = DateTime.Now;
             res.PagamentosRegistrados.Add(p);
             
             res.AtualizarStatusReserva();
-            tela.Pausa("Pagamento registrado com sucesso! Pressione Enter.");
+
+            if (troco > 0)
+            {
+                tela.Pausa($"Pagamento registrado. TROCO: R$ {troco:F2}. Pressione Enter.");
+            }
+            else
+            {
+                tela.Pausa("Pagamento registrado com sucesso! Pressione Enter.");
+            }
         }
         else
         {

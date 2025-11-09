@@ -199,8 +199,8 @@ public class RelatorioCRUD
         {
             Console.SetCursorPosition(colDinamica, linhaAtual); Console.Write("Cliente");
         }
-        Console.SetCursorPosition(colIni, linhaAtual); Console.Write("Início (dd/MM HH:mm)");
-        Console.SetCursorPosition(colFim, linhaAtual); Console.Write("Fim (dd/MM HH:mm)");
+        Console.SetCursorPosition(colIni, linhaAtual); Console.Write("Início");
+        Console.SetCursorPosition(colFim, linhaAtual); Console.Write("Fim");
         Console.SetCursorPosition(colStatus, linhaAtual); Console.Write("Status");
         linhaAtual++;
         Console.SetCursorPosition(colId, linhaAtual); Console.Write(new string('─', 100));
