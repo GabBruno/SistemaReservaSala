@@ -45,7 +45,7 @@ public class ClienteCRUD
                 case "4": ListarClientes(); break;
                 case "5": ExcluirCliente(); break; 
                 case "0": return; 
-                default:tela.Pausa("Opção inválida. Pressione Enter."); break;
+                default: tela.Pausa("Opção inválida. Pressione Enter."); break;
             }
         }
     }
@@ -56,10 +56,10 @@ public class ClienteCRUD
         
         this.cliente = new Cliente();
         
-        cliente.nome = tela.PerguntarNaAcao(3, "Nome: ");
-        cliente.cpf = tela.PerguntarNaAcao(4, "CPF: ");
-        cliente.email = tela.PerguntarNaAcao(5, "E-mail: ");
-        cliente.telefone = tela.PerguntarNaAcao(6, "Telefone: ");
+        cliente.nome = tela.PerguntarNaAcao(2, "Nome: ");
+        cliente.cpf = tela.PerguntarNaAcao(3, "CPF: ");
+        cliente.email = tela.PerguntarNaAcao(4, "E-mail: ");
+        cliente.telefone = tela.PerguntarNaAcao(5, "Telefone: ");
 
         if (string.IsNullOrWhiteSpace(cliente.nome) || string.IsNullOrWhiteSpace(cliente.cpf) ||
             string.IsNullOrWhiteSpace(cliente.email) || string.IsNullOrWhiteSpace(cliente.telefone))
@@ -96,18 +96,18 @@ public class ClienteCRUD
     private void EditarCliente()
     {
         string doc = tela.PerguntarRodape("Digite o CPF do cliente para editar: ");
-        
+
         Cliente clienteParaEditar = ProcurarPorDocumento(doc);
-        
+
         if (clienteParaEditar == null)
         {
             tela.Pausa("Cliente não encontrado. Pressione Enter.");
             return;
         }
-        
+
         this.posicao = clientes.IndexOf(clienteParaEditar);
         tela.DesenharJanelaAcao("EDITAR CLIENTE");
-        int linDiv = 7; 
+        int linDiv = 8; 
         tela.DesenharDivisoriaAcao(linDiv, " DADOS ATUAIS ");
 
         tela.EscreverNaAcao(linDiv + 2, $"Nome: {clienteParaEditar.nome}");
@@ -116,23 +116,35 @@ public class ClienteCRUD
         tela.EscreverNaAcao(linDiv + 5, $"Telefone: {clienteParaEditar.telefone}");
 
         string nome = tela.PerguntarNaAcao(2, "Novo Nome: ");
-        string email = tela.PerguntarNaAcao(3, "Novo E-mail: ");
-        string tel = tela.PerguntarNaAcao(4, "Novo Telefone: ");
+        string novoCpf = tela.PerguntarNaAcao(3, "Novo CPF: ");
+        string email = tela.PerguntarNaAcao(4, "Novo E-mail: ");
+        string tel = tela.PerguntarNaAcao(5, "Novo Telefone: ");
+
+        if (!string.IsNullOrWhiteSpace(novoCpf))
+        {
+            Cliente cpfDuplicado = ProcurarPorDocumento(novoCpf);
+            if (cpfDuplicado != null && cpfDuplicado.id != clienteParaEditar.id)
+            {
+                tela.Pausa("Erro: Este CPF já pertence a outro cliente. Pressione Enter.");
+                return;
+            }
+        }
 
         if (!string.IsNullOrWhiteSpace(email))
         {
             Cliente emailDuplicado = ProcurarPorEmail(email);
             if (emailDuplicado != null && emailDuplicado.id != clienteParaEditar.id)
             {
-                 tela.Pausa("Erro: Este Email já pertence a outro cliente. Pressione Enter.");
-                 return;
+                tela.Pausa("Erro: Este Email já pertence a outro cliente. Pressione Enter.");
+                return;
             }
         }
-        
+
         string resp = tela.PerguntarRodape("Confirma as alterações no cliente? (S/N): ");
         if (resp.ToUpper() == "S")
         {
             if (!string.IsNullOrWhiteSpace(nome)) clienteParaEditar.nome = nome;
+            if (!string.IsNullOrWhiteSpace(novoCpf)) clienteParaEditar.cpf = novoCpf;
             if (!string.IsNullOrWhiteSpace(email)) clienteParaEditar.email = email;
             if (!string.IsNullOrWhiteSpace(tel)) clienteParaEditar.telefone = tel;
 
@@ -157,11 +169,11 @@ public class ClienteCRUD
         }
         
         tela.DesenharJanelaAcao("CONSULTAR CLIENTE");
-        tela.EscreverNaAcao(3, $"ID: {cliente.id}");
-        tela.EscreverNaAcao(4, $"Nome: {cliente.nome}");
-        tela.EscreverNaAcao(5, $"CPF: {cliente.cpf}");
-        tela.EscreverNaAcao(6, $"Email: {cliente.email}");
-        tela.EscreverNaAcao(7, $"Telefone: {cliente.telefone}");
+        tela.EscreverNaAcao(2, $"ID: {cliente.id}");
+        tela.EscreverNaAcao(3, $"Nome: {cliente.nome}");
+        tela.EscreverNaAcao(4, $"CPF: {cliente.cpf}");
+        tela.EscreverNaAcao(5, $"Email: {cliente.email}");
+        tela.EscreverNaAcao(6, $"Telefone: {cliente.telefone}");
         
         tela.Pausa("Pressione Enter para voltar ao menu de clientes...");
     }

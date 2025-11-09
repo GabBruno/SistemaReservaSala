@@ -116,10 +116,10 @@ public class SalaCRUD
         tela.EscreverNaAcao(linDiv + 3, $"Capacidade: {salaParaEditar.capacidade}");
         tela.EscreverNaAcao(linDiv + 4, $"Valor/Hora: R$ {salaParaEditar.valorHora:F2}");
 
-        string nome = tela.PerguntarNaAcao(3, $"Novo Nome [{salaParaEditar.nome}]: ");
-        string capStr = tela.PerguntarNaAcao(4, $"Nova Capacidade [{salaParaEditar.capacidade}]: ");
-        string valStr = tela.PerguntarNaAcao(5, $"Novo Valor/Hora [{salaParaEditar.valorHora:F2}]: ");
-        
+        string nome = tela.PerguntarNaAcao(2, $"Novo Nome: ");
+        string capStr = tela.PerguntarNaAcao(3, $"Nova Capacidade: ");
+        string valStr = tela.PerguntarNaAcao(4, $"Novo Valor/Hora: ");
+
         if (!string.IsNullOrWhiteSpace(nome))
         {
              Sala nomeDuplicado = salas.Find(s => s.nome.Equals(nome, StringComparison.OrdinalIgnoreCase) && s.id != salaParaEditar.id);
@@ -225,9 +225,11 @@ public class SalaCRUD
         }
 
         tela.DesenharJanelaAcao("EXCLUIR SALA");
-        tela.EscreverNaAcao(3, $"ID: {salaParaExcluir.id}");
-        tela.EscreverNaAcao(4, $"Nome: {salaParaExcluir.nome}");
-        tela.EscreverNaAcao(5, $"Capacidade: {salaParaExcluir.capacidade}");
+        tela.EscreverNaAcao(2, $"ID: {salaParaExcluir.id}");
+        tela.EscreverNaAcao(3, $"Nome: {salaParaExcluir.nome}");
+        tela.EscreverNaAcao(4, $"Capacidade: {salaParaExcluir.capacidade}");
+        tela.EscreverNaAcao(5, $"Valor/Hora: R$ {salaParaExcluir.valorHora:F2}");
+        tela.EscreverNaAcao(6, $"Recursos: {string.Join(", ", salaParaExcluir.recursosFixos)}");
 
         string resp = tela.PerguntarRodape($"Tem certeza que deseja EXCLUIR a {salaParaExcluir.nome}? (S/N): ");
         if (resp.ToUpper() == "S")

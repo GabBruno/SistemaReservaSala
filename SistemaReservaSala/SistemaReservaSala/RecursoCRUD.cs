@@ -54,10 +54,10 @@ public class RecursoCRUD
         tela.DesenharJanelaAcao("CADASTRAR RECURSO");
         this.recurso = new Recurso();
 
-        recurso.nome = tela.PerguntarNaAcao(3, "Nome do Recurso: ");
-        decimal.TryParse(tela.PerguntarNaAcao(4, "Custo por Unidade (R$): "), out decimal custo);
+        recurso.nome = tela.PerguntarNaAcao(2, "Nome do Recurso: ");
+        decimal.TryParse(tela.PerguntarNaAcao(3, "Custo por Unidade (R$): "), out decimal custo);
         recurso.CustoPorUnidade = custo;
-        int.TryParse(tela.PerguntarNaAcao(5, "Quantidade em Estoque: "), out int qtd);
+        int.TryParse(tela.PerguntarNaAcao(4, "Quantidade em Estoque: "), out int qtd);
         recurso.QuantidadeEmEstoque = qtd;
 
         if (string.IsNullOrWhiteSpace(recurso.nome) || recurso.CustoPorUnidade < 0 || recurso.QuantidadeEmEstoque < 0)
@@ -98,18 +98,30 @@ public class RecursoCRUD
         
         this.posicao = recursos.IndexOf(recursoEditar);
         tela.DesenharJanelaAcao("EDITAR RECURSO");
-        int linDiv = 6; 
+        int linDiv = 7;
         tela.DesenharDivisoriaAcao(linDiv, " DADOS ATUAIS ");
         tela.EscreverNaAcao(linDiv + 2, $"Recurso: {recursoEditar.nome}");
         tela.EscreverNaAcao(linDiv + 3, $"Custo: R$ {recursoEditar.CustoPorUnidade:F2}");
         tela.EscreverNaAcao(linDiv + 4, $"Estoque: {recursoEditar.QuantidadeEmEstoque}");
 
-        string custoStr = tela.PerguntarNaAcao(3, $"Novo Custo (R$) [{recursoEditar.CustoPorUnidade:F2}]: ");
-        string qtdStr = tela.PerguntarNaAcao(4, $"Nova Qtd. Estoque [{recursoEditar.QuantidadeEmEstoque}]: ");
+        string novoNome = tela.PerguntarNaAcao(2, $"Novo Nome: ");
+        string custoStr = tela.PerguntarNaAcao(3, $"Novo Custo (R$): ");
+        string qtdStr = tela.PerguntarNaAcao(4, $"Nova Qtd. Estoque: ");
+
+        if (!string.IsNullOrWhiteSpace(novoNome))
+        {
+             Recurso nomeDuplicado = ProcurarPorNome(novoNome);
+             if (nomeDuplicado != null && nomeDuplicado.id != recursoEditar.id)
+             {
+                 tela.Pausa("Erro: Já existe um recurso com este nome. Pressione Enter.");
+                 return;
+             }
+        }
 
         string resp = tela.PerguntarRodape("Confirma as alterações no recurso? (S/N): ");
         if (resp.ToUpper() == "S")
         {
+            if (!string.IsNullOrWhiteSpace(novoNome)) recursoEditar.nome = novoNome;
             if (decimal.TryParse(custoStr, out decimal custo) && custo >= 0) recursoEditar.CustoPorUnidade = custo;
             if (int.TryParse(qtdStr, out int qtd) && qtd >= 0) recursoEditar.QuantidadeEmEstoque = qtd;
             
@@ -178,9 +190,9 @@ public class RecursoCRUD
         }
 
         tela.DesenharJanelaAcao("EXCLUIR RECURSO");
-        tela.EscreverNaAcao(3, $"ID: {recursoParaExcluir.id}");
-        tela.EscreverNaAcao(4, $"Nome: {recursoParaExcluir.nome}");
-        tela.EscreverNaAcao(5, $"Estoque: {recursoParaExcluir.QuantidadeEmEstoque}");
+        tela.EscreverNaAcao(2, $"ID: {recursoParaExcluir.id}");
+        tela.EscreverNaAcao(3, $"Nome: {recursoParaExcluir.nome}");
+        tela.EscreverNaAcao(4, $"Estoque: {recursoParaExcluir.QuantidadeEmEstoque}");
 
         string resp = tela.PerguntarRodape($"Tem certeza que deseja EXCLUIR {recursoParaExcluir.nome}? (S/N): ");
         if (resp.ToUpper() == "S")
