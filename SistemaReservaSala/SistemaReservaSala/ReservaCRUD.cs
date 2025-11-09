@@ -29,6 +29,7 @@ public class ReservaCRUD
         opcoes.Add("[2] Cancelar Reserva      ");
         opcoes.Add("[3] Listar Reservas Ativas");
         opcoes.Add("[4] Registrar Pagamento   ");
+        opcoes.Add("[5] Lista de Preparação   ");
         opcoes.Add("[0] Voltar                ");
         
         while (true)
@@ -46,6 +47,7 @@ public class ReservaCRUD
                 case "2": CancelarReserva(); break;
                 case "3": ListarReservas(); break; 
                 case "4": RegistrarPagamentoExtra(); break;
+                case "5": GerarListaPreparacao(); break;
                 case "0": return; 
                 default:tela.Pausa("Opção inválida. Pressione Enter.");break;
             }
@@ -58,7 +60,7 @@ public class ReservaCRUD
         this.reserva = new Reserva();
 
         string doc = tela.PerguntarNaAcao(3, "CPF do Cliente: ");
-        Cliente? cliente = clienteCRUD.ProcurarPorDocumento(doc); 
+        Cliente cliente = clienteCRUD.ProcurarPorDocumento(doc); 
         if (cliente == null)
         {
             tela.Pausa("Erro: Cliente não cadastrado. Pressione Enter.");
@@ -68,7 +70,7 @@ public class ReservaCRUD
         tela.EscreverNaAcao(3, $"CPF do Cliente: {cliente.cpf} - {cliente.nome}");
 
         string nomeSala = tela.PerguntarNaAcao(4, "Nome da Sala: ");
-        Sala? sala = salaCRUD.ProcurarPorNome(nomeSala); 
+        Sala sala = salaCRUD.ProcurarPorNome(nomeSala); 
         if (sala == null)
         {
             tela.Pausa("Erro: Sala não encontrada. Pressione Enter.");
@@ -227,7 +229,7 @@ public class ReservaCRUD
         string idBuscaStr = tela.PerguntarRodape("Digite o ID da Reserva para cancelar: ");
         int.TryParse(idBuscaStr, out int idBusca);
 
-        Reserva? res = reservas.Find(r => r.id == idBusca && r.StatusReserva != "Cancelada");
+        Reserva res = reservas.Find(r => r.id == idBusca && r.StatusReserva != "Cancelada");
         if (res == null)
         {
             tela.Pausa("Reserva não encontrada ou já cancelada. Pressione Enter.");
@@ -307,10 +309,10 @@ public class ReservaCRUD
             }
             
             Console.SetCursorPosition(colId, linhaAtual); Console.Write(r.id.ToString());
-            Console.SetCursorPosition(colCli, linhaAtual); Console.Write(r.cliente.nome.Length > 14 ? r.cliente.nome.Substring(0, 14) : r.cliente.nome); // Limita nome longo
+            Console.SetCursorPosition(colCli, linhaAtual); Console.Write(r.cliente.nome.Length > 14 ? r.cliente.nome.Substring(0, 14) : r.cliente.nome); 
             Console.SetCursorPosition(colSala, linhaAtual); Console.Write(r.sala.nome.Length > 10 ? r.sala.nome.Substring(0, 10) : r.sala.nome);
             Console.SetCursorPosition(colIni, linhaAtual); Console.Write(r.DataHoraInicio.ToString("dd/MM HH:mm"));
-            Console.SetCursorPosition(colFim, linhaAtual); Console.Write(r.DataHoraFim.ToString("dd/MM HH:mm")); // NOVA DADA
+            Console.SetCursorPosition(colFim, linhaAtual); Console.Write(r.DataHoraFim.ToString("dd/MM HH:mm"));
             Console.SetCursorPosition(colStatus, linhaAtual); Console.Write(r.StatusReserva);
             Console.SetCursorPosition(colPago, linhaAtual); Console.Write($"R$ {r.ValorPagoTotal():F2}");
             linhaAtual++;
@@ -324,7 +326,7 @@ public class ReservaCRUD
         string idBuscaStr = tela.PerguntarRodape("Digite o ID da Reserva para pagar: ");
         int.TryParse(idBuscaStr, out int idBusca);
 
-        Reserva? res = reservas.Find(r => r.id == idBusca && r.StatusReserva != "Cancelada");
+        Reserva res = reservas.Find(r => r.id == idBusca && r.StatusReserva != "Cancelada");
         if (res == null)
         {
             tela.Pausa("Reserva não encontrada. Pressione Enter.");
@@ -397,9 +399,146 @@ public class ReservaCRUD
             tela.Pausa("Pagamento cancelado. Pressione Enter.");
         }
     }
-    
+
     public List<Reserva> Reservas()
     {
         return this.reservas;
+    }
+
+    public void VerificarAlertasProximos()
+    {
+        tela.PrepararTelaPrincipal("ALERTAS: RESERVAS INICIANDO EM ATÉ 1H");
+
+        DateTime agora = DateTime.Now;
+        DateTime horaLimite = agora.AddHours(1);
+
+        var alertas = reservas.Where(r => r.StatusReserva == "Confirmada" &&
+                                          r.DataHoraInicio >= agora &&
+                                          r.DataHoraInicio <= horaLimite)
+                              .OrderBy(r => r.DataHoraInicio)
+                              .ToList();
+
+        if (alertas.Count == 0)
+        {
+            tela.Pausa("Nenhuma reserva encontrada iniciando na próxima hora. Pressione Enter.");
+            return;
+        }
+
+        int linha = 4;
+        Console.SetCursorPosition(2, linha++);
+        Console.Write($"ATENÇÃO: {alertas.Count} reserva(s) precisam de preparação/aviso:");
+        linha++;
+
+        string linhaSimples = new string('─', 96);
+
+        foreach (var r in alertas)
+        {
+            if (linha >= 22) 
+            {
+                 tela.Pausa("Pressione Enter para ver os próximos alertas...");
+                 tela.PrepararTelaPrincipal("ALERTAS: RESERVAS INICIANDO EM ATÉ 1H (Cont.)");
+                 linha = 4;
+            }
+
+            double minutosRestantes = (r.DataHoraInicio - agora).TotalMinutes;
+
+            Console.SetCursorPosition(2, linha++);
+            Console.Write(linhaSimples);
+            
+            Console.SetCursorPosition(4, linha++);
+            Console.Write($"INÍCIO ÀS {r.DataHoraInicio:HH:mm} (Faltam {minutosRestantes:F0} min)");
+
+            Console.SetCursorPosition(2, linha++);
+
+            Console.SetCursorPosition(4, linha++);
+            Console.Write($"SALA   : {r.sala.nome.PadRight(20)} STATUS: {r.StatusReserva.ToUpper()}");
+            
+            Console.SetCursorPosition(4, linha++);
+            Console.Write($"CLIENTE: {r.cliente.nome.PadRight(20)} TEL   : {r.cliente.telefone}");
+
+            Console.SetCursorPosition(2, linha++);
+            Console.Write(linhaSimples);
+            
+            linha++;
+        }
+
+        tela.Pausa("Fim dos alertas. Realize os contatos necessários. Pressione Enter.");
+    }
+    
+    private void GerarListaPreparacao()
+    {
+        tela.PrepararTelaPrincipal("LISTA DE PREPARAÇÃO DE SALAS (SETUP)");
+
+        string dataStr = tela.PerguntarRodape("Digite a Data (dd/MM/yyyy) ou Enter para HOJE: ");
+        DateTime dataAlvo;
+        if (string.IsNullOrWhiteSpace(dataStr))
+        {
+            dataAlvo = DateTime.Today;
+        }
+        else
+        {
+            if (!DateTime.TryParseExact(dataStr, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dataAlvo))
+            {
+                tela.Pausa("Data inválida. Pressione Enter.");
+                return;
+            }
+        }
+
+        var reservasDoDia = reservas.Where(r => r.StatusReserva == "Confirmada" && r.DataHoraInicio.Date == dataAlvo.Date)
+                                    .OrderBy(r => r.DataHoraInicio)
+                                    .ToList();
+
+        if (reservasDoDia.Count == 0)
+        {
+            tela.Pausa($"Nenhuma reserva confirmada para {dataAlvo:dd/MM/yyyy}. Pressione Enter.");
+            return;
+        }
+
+        tela.PrepararTelaPrincipal($"SETUP DO DIA: {dataAlvo:dd/MM/yyyy}");
+        int linha = 4;
+
+        string linhaSimples = new string('─', 96);
+
+        foreach (var r in reservasDoDia)
+        {
+            int alturaCartao = 6 + (r.ItensConsumidos.Count > 0 ? r.ItensConsumidos.Count + 1 : 1);
+            if (linha + alturaCartao >= 24)
+            {
+                tela.Pausa("Pressione Enter para ver a continuação...");
+                tela.PrepararTelaPrincipal($"SETUP DO DIA: {dataAlvo:dd/MM/yyyy} (Cont.)");
+                linha = 4;
+            }
+
+            Console.SetCursorPosition(2, linha++);
+            Console.Write(linhaSimples);
+            Console.SetCursorPosition(4, linha++);
+            Console.Write($"[{r.DataHoraInicio:HH:mm} - {r.DataHoraFim:HH:mm}] SALA: {r.sala.nome.ToUpper()}");
+            Console.SetCursorPosition(2, linha++);
+
+            Console.SetCursorPosition(4, linha++);
+            Console.Write($"CLIENTE: {r.cliente.nome}");
+
+            if (r.ItensConsumidos.Count == 0)
+            {
+                 Console.SetCursorPosition(4, linha++);
+                 Console.Write("RECURSOS: Nenhum recurso adicional.");
+            }
+            else
+            {
+                Console.SetCursorPosition(4, linha++);
+                Console.Write("RECURSOS A MONTAR:");
+                foreach (var item in r.ItensConsumidos)
+                {
+                    Console.SetCursorPosition(6, linha++);
+                    Console.Write($"[ ] {item.QuantidadeSolicitada}x {item.Recurso.nome}");
+                }
+            }
+
+            Console.SetCursorPosition(2, linha++);
+            Console.Write(linhaSimples);
+            linha++;
+        }
+
+        tela.Pausa("Fim da lista de preparação. Pressione Enter para voltar.");
     }
 }
